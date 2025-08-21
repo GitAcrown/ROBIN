@@ -35,12 +35,7 @@ class BankAccountView(ui.LayoutView):
         
         self.header = ui.TextDisplay(f"## {ICONS['piggybank']} Compte bancaire · {account.user.mention}")
         container.add_item(self.header)
-        
-        if banner:
-            media_gallery = ui.MediaGallery()
-            media_gallery.add_item(media=banner.image_url, description=f"Bannière de {account.user.name}")
-            container.add_item(media_gallery)
-        
+    
         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.large))
         
         self.balance = ui.TextDisplay(f"{ICONS['coins']} **Solde** · ***{account.balance}{MONEY_SYMBOL}***")
