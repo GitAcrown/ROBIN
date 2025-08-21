@@ -118,7 +118,7 @@ class BannersShopView(ui.LayoutView):
                 
                 if is_owned:
                     # Déjà possédée - proposer la revente
-                    sell_price = banner.price // 2
+                    sell_price = int(banner.price // 2)
                     price_info = f"**Prix d'achat :** ~~{banner.price}{MONEY_SYMBOL}~~ · **Revente :** {sell_price}{MONEY_SYMBOL}"
                     button = BannerSellButton(banner.id, banner.name, sell_price)
                 elif not has_enough_money:
