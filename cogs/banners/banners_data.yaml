@@ -1,0 +1,14 @@
+banner.fleurs:
+  name: "Fleuri"
+  item_type: "banner"
+  image_url: "https://i.imgur.com/cL2XrjZ.png"
+  price: 250
+  available: true
+  max_quantity: 1
+banner.plage:
+  name: "Plage"
+  item_type: "banner"
+  image_url: "https://i.imgur.com/XTFoEYT.png"
+  price: 250
+  available: true
+  max_quantity: 1

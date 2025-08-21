@@ -10,6 +10,8 @@ from discord.ext import commands
 from common import dataio
 from common.economy import EconomyDBManager, BankAccount, Operation, MONEY_SYMBOL
 
+from cogs.banners.banners import Banners, BannerData
+
 logger = logging.getLogger(f'ROBIN.{__name__.split(".")[-1]}')
 
 ICONS = {
@@ -24,14 +26,21 @@ ICONS = {
 # UI -------------------------------------------
 
 class BankAccountView(ui.LayoutView):
-    def __init__(self, account: BankAccount, guild: discord.Guild | None = None):
+    def __init__(self, account: BankAccount, user: discord.User, guild: discord.Guild | None = None, banner: BannerData | None = None):
         super().__init__(timeout=300)  # 5 minutes timeout
         self.account = account
+        self.user = user
         
         container = ui.Container()
         
         self.header = ui.TextDisplay(f"## {ICONS['piggybank']} Compte bancaire · {account.user.mention}")
         container.add_item(self.header)
+        
+        if banner:
+            media_gallery = ui.MediaGallery()
+            media_gallery.add_item(media=banner.image_url, description=f"Bannière de {account.user.name}")
+            container.add_item(media_gallery)
+        
         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.large))
         
         self.balance = ui.TextDisplay(f"{ICONS['coins']} **Solde** · ***{account.balance}{MONEY_SYMBOL}***")
@@ -67,7 +76,24 @@ class BankAccountView(ui.LayoutView):
             self.trs = ui.TextDisplay(f"```diff\n{trs_text}```")
             
         container.add_item(self.trs)
+        
+        if banner:
+            container.add_item(ui.Separator())
+            media_gallery = ui.MediaGallery()
+            media_gallery.add_item(media=banner.image_url, description=f"Bannière de {account.user.name}")
+            container.add_item(media_gallery)
+        
         self.add_item(container)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "**ERREUR** · Vous ne pouvez pas interagir avec ce menu.", 
+                ephemeral=True
+            )
+            return False
+        return True
         
 class NavigationButtons(ui.ActionRow['OperationHistoryView']):
     def __init__(self):
@@ -101,7 +127,7 @@ class NavigationButtons(ui.ActionRow['OperationHistoryView']):
             self.view.current_page -= 1
             self.view.update_display()
             self.update_buttons()
-            await interaction.response.edit_message(view=self.view)
+            await interaction.response.edit_message(view=self.view, allowed_mentions=discord.AllowedMentions.none())
     
     @ui.button(label='Page 1/1', style=discord.ButtonStyle.primary, disabled=True)
     async def page_info(self, interaction: discord.Interaction, button: ui.Button):
@@ -125,14 +151,25 @@ class NavigationButtons(ui.ActionRow['OperationHistoryView']):
 
 class RankingView(ui.LayoutView):
     """Vue pour afficher le classement des utilisateurs par solde."""
-    def __init__(self, sorted_accounts: list, user_account: BankAccount, user_rank: int, guild: discord.Guild):
+    def __init__(self, sorted_accounts: list, user_account: BankAccount, user_rank: int, guild: discord.Guild, user: discord.User):
         super().__init__(timeout=300)
         self.sorted_accounts = sorted_accounts
         self.user_account = user_account
         self.user_rank = user_rank
         self.guild = guild
+        self.user = user
         
         self._setup_layout()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "**ERREUR** · Vous ne pouvez pas interagir avec ce menu.", 
+                ephemeral=True
+            )
+            return False
+        return True
     
     def _setup_layout(self):
         """Configure la mise en page du classement."""
@@ -177,9 +214,10 @@ class RankingView(ui.LayoutView):
         self.add_item(container)
 
 class OperationHistoryView(ui.LayoutView):
-    def __init__(self, account: BankAccount):
+    def __init__(self, account: BankAccount, user: discord.User):
         super().__init__(timeout=300)
         self.account = account
+        self.user = user
         
         operations = account.get_recent_operations(limit=200)
         self.pages = [operations[i:i + 5] for i in range(0, len(operations), 5)]
@@ -188,6 +226,16 @@ class OperationHistoryView(ui.LayoutView):
         self.current_page = 0
         
         self.build_interface()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "**ERREUR** · Vous ne pouvez pas interagir avec ce menu.", 
+                ephemeral=True
+            )
+            return False
+        return True
         
     def build_interface(self):
         self.clear_items()
@@ -255,12 +303,13 @@ class OperationHistoryView(ui.LayoutView):
 
 
 class TransfertView(ui.LayoutView):
-    def __init__(self, sender: BankAccount, sender_op: Operation, recipient: BankAccount, recipient_op: Operation, amount: int, reason: str | None = None):
+    def __init__(self, sender: BankAccount, sender_op: Operation, recipient: BankAccount, recipient_op: Operation, amount: int, user: discord.User, reason: str | None = None):
         super().__init__(timeout=300)  # 5 minutes timeout
         self.sender = sender
         self.recipient = recipient
         self.amount = amount
         self.reason = reason
+        self.user = user
         
         container = ui.Container()
         
@@ -286,6 +335,18 @@ class TransfertView(ui.LayoutView):
         recipient_thumb = ui.Thumbnail(media=recipient.user.display_avatar.url)
         self.recipient_section = ui.Section(recipient_title, recipient_info, recipient_op, accessory=recipient_thumb)
         container.add_item(self.recipient_section)
+        
+        self.add_item(container)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "**ERREUR** · Vous ne pouvez pas interagir avec ce menu.", 
+                ephemeral=True
+            )
+            return False
+        return True
 
 # COG ===========================================
 
@@ -294,6 +355,15 @@ class Bank(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.eco = EconomyDBManager()
+        
+    # Bannières de profil --------------------------------
+    
+    def get_user_banner(self, user: discord.User | discord.Member) -> Optional[BannerData]:
+        """Récupère la bannière de profil d'un utilisateur."""
+        cog: Banners = self.bot.get_cog('Banners')
+        if cog:
+            return cog.fetch_current_banner_data(user)
+        return None
         
     # COMMANDES ------------------------------------------
     
@@ -310,7 +380,9 @@ class Bank(commands.Cog):
         if not account:
             return interaction.response.send_message(f"Aucun compte trouvé pour {user.name}.", ephemeral=True)
         
-        view = BankAccountView(account, guild=interaction.guild)
+        banner = self.get_user_banner(user)
+        
+        view = BankAccountView(account, interaction.user, guild=interaction.guild, banner=banner)
         await interaction.response.send_message(
             view=view,
             allowed_mentions=discord.AllowedMentions.none()
@@ -329,7 +401,7 @@ class Bank(commands.Cog):
         if not account:
             return await interaction.response.send_message(f"Aucun compte trouvé pour {user.name}.", ephemeral=True)
         
-        view = OperationHistoryView(account)
+        view = OperationHistoryView(account, interaction.user)
         await interaction.response.send_message(
             view=view,
             allowed_mentions=discord.AllowedMentions.none()
@@ -357,7 +429,7 @@ class Bank(commands.Cog):
                 break
         
         # Créer la vue LayoutView
-        view = RankingView(sorted_accounts, user_account, user_rank, guild)
+        view = RankingView(sorted_accounts, user_account, user_rank, guild, interaction.user)
         await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
         
     @app_commands.command(name='transfer')
@@ -384,7 +456,7 @@ class Bank(commands.Cog):
         
         sop = sender.withdraw(amount, f"Transfert vers {user.name}" + (f" ({reason})" if reason else ""))
         rop = recipient.deposit(amount, f"Transfert de {interaction.user.name}" + (f" ({reason})" if reason else ""))
-        view = TransfertView(sender, sop, recipient, rop, amount, reason)
+        view = TransfertView(sender, sop, recipient, rop, amount, interaction.user, reason)
         await interaction.response.send_message(
             view=view,
             allowed_mentions=discord.AllowedMentions.none() if not notify else discord.AllowedMentions(users=[user])

@@ -174,14 +174,22 @@ COMPAT_PLATS = {
 
 class CookGameView(ui.LayoutView):
     """Vue pour le mini-jeu de cuisine."""
-    def __init__(self, account: BankAccount, plat: str, ingredients: dict):
+    def __init__(self, account: BankAccount, plat: str, ingredients: dict, user: discord.User):
         super().__init__(timeout=60)
         self.account = account
         self.plat = plat
         self.ingredients = ingredients
+        self.user = user
         self.result = None
         
         self._setup_layout()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message("Vous ne pouvez pas utiliser ce menu.", ephemeral=True)
+            return False
+        return True
     
     def _setup_layout(self):
         """Configure la mise en page du mini-jeu."""
@@ -301,13 +309,21 @@ class IngredientButton(ui.Button['CookGameView']):
 # Livreur Game View ---------------------------
 class DeliveryGameView(ui.LayoutView):
     """Vue pour le mini-jeu de livraison."""
-    def __init__(self, account: BankAccount):
+    def __init__(self, account: BankAccount, user: discord.User):
         super().__init__(timeout=30)
         self.account = account
+        self.user = user
         self.event = random.choice(DELIVERY_EVENTS)
         self.tip = random.randint(self.event["tip_range"][0], self.event["tip_range"][1])
         
         self._setup_layout()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message("Vous ne pouvez pas utiliser ce menu.", ephemeral=True)
+            return False
+        return True
     
     def _setup_layout(self):
         """Configure la mise en page du mini-jeu."""
@@ -365,15 +381,23 @@ class DeliveryButton(ui.Button['DeliveryGameView']):
 # Pickpocket Game View ---------------------------
 class PickpocketGameView(ui.LayoutView):
     """Vue pour le mini-jeu de pickpocket."""
-    def __init__(self, account: BankAccount, guild_members: list):
+    def __init__(self, account: BankAccount, guild_members: list, user: discord.User):
         super().__init__(timeout=30)
         self.account = account
         self.guild_members = guild_members
+        self.user = user
         self.event = random.choice(PICKPOCKET_EVENTS)
         self.amount = random.randint(self.event["amount_range"][0], self.event["amount_range"][1])
         self.target = None
         
         self._setup_layout()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message("Vous ne pouvez pas utiliser ce menu.", ephemeral=True)
+            return False
+        return True
     
     def _setup_layout(self):
         """Configure la mise en page du mini-jeu."""
@@ -570,9 +594,9 @@ class Jobs(commands.Cog):
         
         if work_type.lower() == "livreur":
             account = self.eco.get_account(interaction.user)
-            view = DeliveryGameView(account)
+            view = DeliveryGameView(account, interaction.user)
             self._set_cooldown(interaction.user.id)  # Définir le cooldown
-            await interaction.response.send_message(view=view)
+            await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
             
         elif work_type.lower() == "cuisinier":
             account = self.eco.get_account(interaction.user)
@@ -589,10 +613,10 @@ class Jobs(commands.Cog):
                 ingredients[ingredient] = category
             
             # Créer la vue du mini-jeu
-            view = CookGameView(account, plat, ingredients)
+            view = CookGameView(account, plat, ingredients, interaction.user)
             self._set_cooldown(interaction.user.id)  # Définir le cooldown
             
-            await interaction.response.send_message(view=view)
+            await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
             
         elif work_type.lower() == "pickpocket":
             account = self.eco.get_account(interaction.user)
@@ -601,10 +625,10 @@ class Jobs(commands.Cog):
             guild_members = [member for member in interaction.guild.members if not member.bot]
             
             # Créer la vue du mini-jeu
-            view = PickpocketGameView(account, guild_members)
+            view = PickpocketGameView(account, guild_members, interaction.user)
             self._set_cooldown(interaction.user.id)  # Définir le cooldown
             
-            await interaction.response.send_message(view=view)
+            await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
             
         else:
             await interaction.response.send_message(

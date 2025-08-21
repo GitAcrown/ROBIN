@@ -15,16 +15,27 @@ ICONS = {
 
 class SlotMachineView(ui.LayoutView):
     """Vue pour la machine à sous."""
-    def __init__(self, account: BankAccount, bet: int):
+    def __init__(self, account: BankAccount, bet: int, user: discord.User):
         super().__init__(timeout=60)
         self.account = account
         self.bet = bet
+        self.user = user
         self.symbols = ['🍎', '🍊', '🪙', '🍇', '🍌', '🍀']
         self.wheel = ['🍀', '🍎', '🍊', '🪙', '🍇', '🍌', '🍀', '🍎']
         self.result = None
         self.winnings = 0
         
         self._setup_layout()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "**ERREUR** · Vous ne pouvez pas interagir avec ce menu.", 
+                ephemeral=True
+            )
+            return False
+        return True
     
     def _setup_layout(self):
         """Configure la mise en page initiale."""
@@ -167,8 +178,8 @@ class Casino(commands.GroupCog, group_name="casino", description="Mini-jeux d'ar
             return await interaction.response.send_message(f"**SOLDE INSUFFISANT** · Vous n'avez pas assez d'argent pour miser **{bet}{MONEY_SYMBOL}**. Votre solde actuel est de ***{account.balance}{MONEY_SYMBOL}***.", ephemeral=True)
         
         # Créer la vue du jeu
-        view = SlotMachineView(account, bet)
-        await interaction.response.send_message(view=view)
+        view = SlotMachineView(account, bet, interaction.user)
+        await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
                 
 async def setup(bot):
     await bot.add_cog(Casino(bot))
