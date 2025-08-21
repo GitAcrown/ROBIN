@@ -75,7 +75,7 @@ class BankAccountView(ui.LayoutView):
         if banner:
             container.add_item(ui.Separator())
             media_gallery = ui.MediaGallery()
-            media_gallery.add_item(media=banner.image_url, description=f"Bannière de {account.user.name}")
+            media_gallery.add_item(media=banner.image_url)
             container.add_item(media_gallery)
         
         self.add_item(container)
