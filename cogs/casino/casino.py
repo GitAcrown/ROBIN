@@ -20,8 +20,8 @@ class SlotMachineView(ui.LayoutView):
         self.account = account
         self.bet = bet
         self.user = user
-        self.symbols = ['🍎', '🍊', '🪙', '🍇', '🍌', '🍀']
-        self.wheel = ['🍀', '🍎', '🍊', '🪙', '🍇', '🍌', '🍀', '🍎']
+        self.symbols = ['🍎', '🪙', '🍇', '🍌', '🍀']
+        self.wheel = ['🍀', '🍎', '🪙', '🍇', '🍌', '🍀', '🍎']
         self.result = None
         self.winnings = 0
         
@@ -95,7 +95,7 @@ class SlotMachineView(ui.LayoutView):
         
         # Calculer les gains
         win_type = ""
-        fruits = ['🍎', '🍊', '🍇', '🍌']
+        fruits = ['🍎', '🍇', '🍌']
         
         # Vérifier si tous les symboles sont identiques
         if center_row[0] == center_row[1] == center_row[2]:
