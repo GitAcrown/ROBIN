@@ -47,7 +47,7 @@ class SlotMachineView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Tableau des gains
-        gains_table = ui.TextDisplay('**Tableau des gains :**\n```\n🍎🍊🍇🍌 3x Fruit  = Mise + 40g\n🍀🍀🍀 3x Trèfle   = Mise + 3x Mise\n🪙🪙🪙 3x Pièce    = Mise + 5x Mise\n```\n*Vous êtes toujours remboursé de votre mise quand vous gagnez !*')
+        gains_table = ui.TextDisplay('**Tableau des gains :**\n```\n🍎🍊🍇 3x Fruits mélangés = Mise remboursée\n🍎🍎🍎 3x Fruit identique = Mise + 2x Mise\n🍀🍀🍀 3x Trèfle         = Mise + 3x Mise\n🪙🪙🪙 3x Pièce          = Mise + 5x Mise\n```\n*Vous êtes toujours remboursé de votre mise quand vous gagnez !*')
         container.add_item(gains_table)
         container.add_item(ui.Separator())
         
@@ -95,16 +95,23 @@ class SlotMachineView(ui.LayoutView):
         
         # Calculer les gains
         win_type = ""
+        fruits = ['🍎', '🍊', '🍇', '🍌']
+        
+        # Vérifier si tous les symboles sont identiques
         if center_row[0] == center_row[1] == center_row[2]:
-            if center_row[0] in ['🍎', '🍊', '🍇', '🍌']:
-                self.winnings = self.bet + 40  # Remboursement + bonus
-                win_type = "3x Fruit"
+            if center_row[0] in fruits:
+                self.winnings = self.bet + (self.bet * 2)  # Remboursement + 2x la mise
+                win_type = "3x Fruit identique"
             elif center_row[0] == '🍀':
                 self.winnings = self.bet + (self.bet * 3)  # Remboursement + 3x la mise
                 win_type = "3x Trèfle"
             elif center_row[0] == '🪙':
                 self.winnings = self.bet + (self.bet * 5)  # Remboursement + 5x la mise  
                 win_type = "3x Pièce d'or"
+        # Vérifier si tous les symboles sont des fruits (même différents)
+        elif all(symbol in fruits for symbol in center_row):
+            self.winnings = self.bet  # Remboursement seulement
+            win_type = "3x Fruits mélangés"
         else:
             self.winnings = 0
             win_type = ""
