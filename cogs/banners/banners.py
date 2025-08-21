@@ -24,6 +24,7 @@ class BannerData:
     """Données d'une bannière."""
     id: str
     name: str
+    desc: str
     image_url: str
     price: int
     available: bool = True
@@ -109,8 +110,11 @@ class BannersShopView(ui.LayoutView):
             user_balance = account.balance
             
             for i, banner in enumerate(page_banners):
-                # Titre avec nom (sans emoji)
-                banner_title = ui.TextDisplay(f"### {banner.name}")
+                # Titre avec nom et description (sans emoji)
+                title_text = f"### {banner.name}"
+                if hasattr(banner, 'desc') and banner.desc:
+                    title_text += f"\n*{banner.desc}*"
+                banner_title = ui.TextDisplay(title_text)
                 
                 # Déterminer l'état du bouton
                 is_owned = banner.id in owned_banner_ids
@@ -242,12 +246,18 @@ class BannersSelectionView(ui.LayoutView):
                 if not banner_data:
                     continue
                 
-                # Titre avec nom et statut (sans emoji)
+                # Titre avec nom, description et statut (sans emoji)
                 if user_banner.is_active:
-                    banner_title = ui.TextDisplay(f"### {banner_data.name} (Actuelle)")
+                    title_text = f"### {banner_data.name} (Actuelle)"
+                    if hasattr(banner_data, 'desc') and banner_data.desc:
+                        title_text += f"\n*{banner_data.desc}*"
+                    banner_title = ui.TextDisplay(title_text)
                     button = ui.Button(label="Actuelle", style=discord.ButtonStyle.success, disabled=True)
                 else:
-                    banner_title = ui.TextDisplay(f"### {banner_data.name}")
+                    title_text = f"### {banner_data.name}"
+                    if hasattr(banner_data, 'desc') and banner_data.desc:
+                        title_text += f"\n*{banner_data.desc}*"
+                    banner_title = ui.TextDisplay(title_text)
                     # Utiliser seulement le bouton utiliser (la vente se fait dans la boutique)
                     button = BannerSelectButton(user_banner.banner_id, banner_data.name)
                 
@@ -557,6 +567,7 @@ class Banners(commands.Cog):
             self.banners_data[banner_id] = BannerData(
                 id=banner_id,
                 name=data.get('name', 'Sans nom'),
+                desc=data.get('desc', ''),
                 image_url=data.get('image_url', ''),
                 price=data.get('price', 0),
                 available=data.get('available', True),

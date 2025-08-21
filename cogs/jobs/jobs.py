@@ -297,7 +297,7 @@ class IngredientButton(ui.Button['CookGameView']):
     async def callback(self, interaction: discord.Interaction):
         """Callback quand un ingrédient est sélectionné."""
         # Calculer le tip
-        tip = self.view.calculate_tip(self.category)
+        tip = int(self.view.calculate_tip(self.category))
         
         # Effectuer le dépôt
         self.view.account.deposit(tip, f"Travail de cuisinier - {self.view.plat}")

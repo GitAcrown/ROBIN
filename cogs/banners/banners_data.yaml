@@ -1,5 +1,6 @@
 banner.fleurs:
   name: "Fleuri"
+  desc: "Ajoutez une petit touche florale à votre profil"
   item_type: "banner"
   image_url: "https://i.imgur.com/cL2XrjZ.png"
   price: 250
@@ -7,6 +8,7 @@ banner.fleurs:
   max_quantity: 1
 banner.plage:
   name: "Plage"
+  desc: "Pour les amoureux du sable et des vagues [Exclusif été 2025]"
   item_type: "banner"
   image_url: "https://i.imgur.com/XTFoEYT.png"
   price: 250
@@ -14,6 +16,7 @@ banner.plage:
   max_quantity: 1
 banners.timbres:
   name: "Timbres"
+  desc: "Des timbres de... l'Argentine ? Ok."
   item_type: "banner"
   image_url: "https://i.imgur.com/OS2W0Hx.png"
   price: 350
