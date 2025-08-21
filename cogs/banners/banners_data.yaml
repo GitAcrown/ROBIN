@@ -1,6 +1,6 @@
 banner.fleurs:
   name: "Fleuri"
-  desc: "Ajoutez une petit touche florale à votre profil"
+  desc: "Ajoutez une petite touche florale à votre profil"
   item_type: "banner"
   image_url: "https://i.imgur.com/cL2XrjZ.png"
   price: 250
