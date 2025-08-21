@@ -12,3 +12,10 @@ banner.plage:
   price: 250
   available: true
   max_quantity: 1
+banners.timbres:
+  name: "Timbres"
+  item_type: "banner"
+  image_url: "https://i.imgur.com/OS2W0Hx.png"
+  price: 350
+  available: true
+  max_quantity: 1
