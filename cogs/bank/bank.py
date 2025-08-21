@@ -358,7 +358,7 @@ class Bank(commands.Cog):
         
         # Créer la vue LayoutView
         view = RankingView(sorted_accounts, user_account, user_rank, guild)
-        await interaction.response.send_message(view=view)
+        await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
         
     @app_commands.command(name='transfer')
     @app_commands.guild_only()
