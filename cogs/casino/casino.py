@@ -448,7 +448,7 @@ class Casino(commands.GroupCog, group_name="casino", description="Mini-jeux d'ar
     @app_commands.checks.cooldown(1, 120)
     @app_commands.rename(bet="mise", bet_value="valeur")
     @app_commands.autocomplete(bet_value=bet_value_autocomplete)
-    async def cmd_roulette(self, interaction: discord.Interaction, bet: app_commands.Range[int, 10, 500], bet_value: str):
+    async def cmd_roulette(self, interaction: discord.Interaction, bet: app_commands.Range[int, 20, 200], bet_value: str):
         """Jouer à la roulette européenne
         
         :param bet: Montant mis en jeu (compris entre 10 et 500)
