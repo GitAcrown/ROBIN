@@ -407,7 +407,7 @@ class Bank(commands.Cog):
     async def cmd_ranking(self, interaction: discord.Interaction):
         """Affiche le classement des utilisateurs par solde."""
         guild = interaction.guild
-        members = guild.members
+        members = [m for m in guild.members if not m.bot]
         accounts = self.eco.get_accounts(members)
         
         # Trier les comptes par solde

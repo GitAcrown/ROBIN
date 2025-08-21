@@ -273,9 +273,12 @@ class BankAccount:
         )
         return sum(op.delta for op in ops) or 0
     
-    def get_rank_in_guild(self, guild: discord.Guild) -> int:
+    def get_rank_in_guild(self, guild: discord.Guild, ignore_bots: bool = True) -> int:
         """Retourne le rang du compte dans la guilde."""
-        accounts = self.db_manager.get_accounts(guild.members)
+        members = guild.members
+        if ignore_bots:
+            members = [m for m in members if not m.bot]
+        accounts = self.db_manager.get_accounts(members)
         sorted_accounts = sorted(accounts, key=lambda acc: acc.balance, reverse=True)
         for rank, account in enumerate(sorted_accounts, start=1):
             if account.user.id == self.user.id:
