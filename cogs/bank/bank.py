@@ -193,12 +193,11 @@ class RankingView(ui.LayoutView):
         ranking_display = ui.TextDisplay(ranking_text)
         container.add_item(ranking_display)
         
-        # Rang de l'utilisateur s'il n'est pas dans le top 20
-        if self.user_rank and self.user_rank > 20:
-            container.add_item(ui.Separator())
-            user_section_text = f"**Votre position :**\n**{self.user_rank}.** {self.user_account.user.mention} · ***{self.user_account.balance}{MONEY_SYMBOL}***"
-            user_section = ui.TextDisplay(user_section_text)
-            container.add_item(user_section)
+        
+        container.add_item(ui.Separator())
+        user_section_text = f"**Votre position :**\n**{self.user_rank}.** {self.user_account.user.mention} · ***{self.user_account.balance}{MONEY_SYMBOL}***"
+        user_section = ui.TextDisplay(user_section_text)
+        container.add_item(user_section)
         
         # Footer
         container.add_item(ui.Separator())
