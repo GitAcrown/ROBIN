@@ -267,6 +267,7 @@ class Bank(commands.Cog):
     @app_commands.rename(user='utilisateur', limit='limite')
     async def cmd_history(self, interaction: discord.Interaction, user: Optional[discord.User] = None, limit: app_commands.Range[int, 1, 100] = 10):
         """Affiche l'historique des opérations d'un utilisateur.
+        
         :param user: Utilisateur dont afficher l'historique (par défaut l'utilisateur de la commande)
         :param limit: Nombre d'opérations à afficher (par défaut 10, maximum 100)
         """
