@@ -139,7 +139,7 @@ class BannersShopView(ui.LayoutView):
                 # Ajouter l'image via MediaGallery
                 if banner.image_url:
                     media_gallery = ui.MediaGallery()
-                    media_gallery.add_item(media=banner.image_url, description=banner.name)
+                    media_gallery.add_item(media=banner.image_url)
                     container.add_item(media_gallery)
                 
                 # Séparateur entre bannières (sauf la dernière)
@@ -258,7 +258,7 @@ class BannersSelectionView(ui.LayoutView):
                 # Ajouter l'image via MediaGallery
                 if banner_data.image_url:
                     media_gallery = ui.MediaGallery()
-                    media_gallery.add_item(media=banner_data.image_url, description=banner_data.name)
+                    media_gallery.add_item(media=banner_data.image_url)
                     container.add_item(media_gallery)
                 
                 # Séparateur entre bannières (sauf la dernière)
