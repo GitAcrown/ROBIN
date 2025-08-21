@@ -311,5 +311,35 @@ class Bank(commands.Cog):
             allowed_mentions=discord.AllowedMentions.none() if not notify else discord.AllowedMentions(users=[user])
         )
         
+    # ADMINISTRATION ---------------------------------
+    
+    @app_commands.command(name='amend')
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.rename(user='utilisateur', amount='montant', reason='raison')
+    async def cmd_amend(self, interaction: discord.Interaction, user: discord.User, amount: int, reason: Optional[app_commands.Range[str, 1, 32]] = None):
+        """Ajoute ou retire de l'argent à un utilisateur.
+        
+        :param user: Utilisateur à modifier
+        :param amount: Montant à ajouter (positif) ou retirer (négatif)
+        :param reason: Raison de l'amendement (optionnel)
+        """
+        account = self.eco.get_account(user)
+        if not account:
+            return await interaction.response.send_message(f"Aucun compte trouvé pour {user.name}.", ephemeral=True)
+        if amount == 0:
+            return await interaction.response.send_message("**ERREUR** × Le montant doit être différent de zéro.", ephemeral=True)
+        if amount > 0:
+            op = account.deposit(amount, f"Modif. par {interaction.user.name}" + (f" ({reason})" if reason else ""))
+            result = f"**AJOUTÉ** · +{amount}{MONEY_SYMBOL} à {user.mention}."
+        else:
+            op = account.withdraw(-amount, f"Modif. par {interaction.user.name}" + (f" ({reason})" if reason else ""))
+            result = f"**RETIRÉ** · -{-amount}{MONEY_SYMBOL} de {user.mention}."
+        await interaction.response.send_message(
+            f"{result}\n**Nouveau solde** · *{account.balance}{MONEY_SYMBOL}*",
+            allowed_mentions=discord.AllowedMentions(users=[user])
+        )
+        # Log l'opération
+        logger.info(f"i --- {interaction.user.name} a modifié le compte de {user.name}: {amount}{MONEY_SYMBOL} ({reason or 'Aucune raison'})")
+        
 async def setup(bot):
     await bot.add_cog(Bank(bot))
