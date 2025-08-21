@@ -40,15 +40,13 @@ class SlotMachineView(ui.LayoutView):
         container.add_item(gains_table)
         container.add_item(ui.Separator())
         
-        # Instructions
-        instructions = ui.TextDisplay('**Cliquez sur "Lancer la machine" pour jouer !**')
-        container.add_item(instructions)
+        # Instructions avec bouton en accessoire
+        instructions = ui.TextDisplay('**Cliquez sur "Lancer" pour jouer !**')
+        play_button = SlotPlayButton()
+        instruction_section = ui.Section(instructions, accessory=play_button)
+        container.add_item(instruction_section)
         
         self.add_item(container)
-        
-        # Bouton de jeu
-        play_row = SlotActionRow()
-        self.add_item(play_row)
     
     def _generate_column(self, previous_center=None):
         """Génère une colonne de la machine à sous."""
@@ -88,7 +86,7 @@ class SlotMachineView(ui.LayoutView):
         win_type = ""
         if center_row[0] == center_row[1] == center_row[2]:
             if center_row[0] in ['🍎', '🍊', '🍇', '🍌']:
-                self.winnings = self.bet + 50  # Remboursement + bonus
+                self.winnings = self.bet + 40  # Remboursement + bonus
                 win_type = "3x Fruit"
             elif center_row[0] == '🍀':
                 self.winnings = self.bet + (self.bet * 3)  # Remboursement + 3x la mise
@@ -138,17 +136,10 @@ class SlotMachineView(ui.LayoutView):
         self.add_item(container)
         await interaction.response.edit_message(view=self)
 
-class SlotActionRow(ui.ActionRow['SlotMachineView']):
-    """ActionRow contenant le bouton de jeu."""
-    def __init__(self):
-        super().__init__()
-        play_button = SlotPlayButton()
-        self.add_item(play_button)
-
 class SlotPlayButton(ui.Button['SlotMachineView']):
     """Bouton pour jouer à la machine à sous."""
     def __init__(self):
-        super().__init__(label="Lancer la machine", style=discord.ButtonStyle.primary)
+        super().__init__(label="Lancer", style=discord.ButtonStyle.primary)
     
     async def callback(self, interaction: discord.Interaction):
         """Callback pour jouer."""
