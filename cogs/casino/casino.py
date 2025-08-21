@@ -47,7 +47,7 @@ class SlotMachineView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Tableau des gains
-        gains_table = ui.TextDisplay('**Tableau des gains :**\n```\n🍎🍊🍇 3x Fruits mélangés = Mise remboursée\n🍎🍎🍎 3x Fruit identique = Mise + 2x Mise\n🍀🍀🍀 3x Trèfle         = Mise + 3x Mise\n🪙🪙🪙 3x Pièce          = Mise + 5x Mise\n```\n*Vous êtes toujours remboursé de votre mise quand vous gagnez !*')
+        gains_table = ui.TextDisplay('**Tableau des gains :**\n```\n🍎🍇🍌 3x Fruits mélangés = Mise remboursée\n🍎🍎🍎 3x Fruit identique = Mise + 2x Mise\n🍀🍀🍀 3x Trèfle         = Mise + 3x Mise\n🪙🪙🪙 3x Pièce          = Mise + 5x Mise\n```\n*Vous êtes toujours remboursé de votre mise quand vous gagnez !*')
         container.add_item(gains_table)
         container.add_item(ui.Separator())
         
