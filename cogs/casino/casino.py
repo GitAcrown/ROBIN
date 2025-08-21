@@ -451,7 +451,7 @@ class Casino(commands.GroupCog, group_name="casino", description="Mini-jeux d'ar
     async def cmd_roulette(self, interaction: discord.Interaction, bet: app_commands.Range[int, 20, 200], bet_value: str):
         """Jouer à la roulette européenne
         
-        :param bet: Montant mis en jeu (compris entre 10 et 500)
+        :param bet: Montant mis en jeu (compris entre 20 et 200)
         :param bet_value: Valeur du pari (rouge/noir, pair/impair, douzaine1-3, numéros 0-36)
         """
         account = self.eco.get_account(interaction.user)
