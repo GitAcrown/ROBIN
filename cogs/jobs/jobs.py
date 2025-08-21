@@ -318,15 +318,13 @@ class DeliveryGameView(ui.LayoutView):
         container.add_item(header)
         container.add_item(ui.Separator())
         
-        # Instructions
-        instructions = ui.TextDisplay('**Cliquez sur "Commencer la livraison" pour voir ce qui vous arrive !**')
-        container.add_item(instructions)
+        # Instructions avec bouton en accessoire
+        instructions = ui.TextDisplay('**Cliquez sur "Commencer" pour voir ce qui vous arrive !**')
+        delivery_button = DeliveryButton()
+        instruction_section = ui.Section(instructions, accessory=delivery_button)
+        container.add_item(instruction_section)
         
         self.add_item(container)
-        
-        # Bouton de livraison dans un ActionRow séparé
-        delivery_row = DeliveryActionRow()
-        self.add_item(delivery_row)
     
     async def show_result(self, interaction: discord.Interaction):
         """Affiche le résultat de la livraison."""
@@ -354,17 +352,10 @@ class DeliveryGameView(ui.LayoutView):
         
         await interaction.response.edit_message(view=self)
 
-class DeliveryActionRow(ui.ActionRow['DeliveryGameView']):
-    """ActionRow contenant le bouton de livraison."""
-    def __init__(self):
-        super().__init__()
-        delivery_button = DeliveryButton()
-        self.add_item(delivery_button)
-
 class DeliveryButton(ui.Button['DeliveryGameView']):
     """Bouton pour commencer la livraison."""
     def __init__(self):
-        super().__init__(label="Commencer la livraison", style=discord.ButtonStyle.primary)
+        super().__init__(label="Commencer", style=discord.ButtonStyle.primary)
     
     async def callback(self, interaction: discord.Interaction):
         """Callback pour démarrer la livraison."""
@@ -393,15 +384,13 @@ class PickpocketGameView(ui.LayoutView):
         container.add_item(header)
         container.add_item(ui.Separator())
         
-        # Instructions
-        instructions = ui.TextDisplay('**Cliquez sur "Commencer l\'opération" pour voir ce qui se passe !**')
-        container.add_item(instructions)
+        # Instructions avec bouton en accessoire
+        instructions = ui.TextDisplay('**Cliquez sur "Commencer" pour voir ce qui se passe !**')
+        pickpocket_button = PickpocketButton()
+        instruction_section = ui.Section(instructions, accessory=pickpocket_button)
+        container.add_item(instruction_section)
         
         self.add_item(container)
-        
-        # Bouton d'action dans un ActionRow séparé
-        pickpocket_row = PickpocketActionRow()
-        self.add_item(pickpocket_row)
     
     async def show_result(self, interaction: discord.Interaction):
         """Affiche le résultat du pickpocket."""
@@ -502,17 +491,10 @@ class PickpocketGameView(ui.LayoutView):
         self.add_item(container)
         await interaction.response.edit_message(view=self)
 
-class PickpocketActionRow(ui.ActionRow['PickpocketGameView']):
-    """ActionRow contenant le bouton de pickpocket."""
-    def __init__(self):
-        super().__init__()
-        pickpocket_button = PickpocketButton()
-        self.add_item(pickpocket_button)
-
 class PickpocketButton(ui.Button['PickpocketGameView']):
     """Bouton pour commencer le pickpocket."""
     def __init__(self):
-        super().__init__(label="Commencer l'opération", style=discord.ButtonStyle.danger)
+        super().__init__(label="Commencer", style=discord.ButtonStyle.danger)
     
     async def callback(self, interaction: discord.Interaction):
         """Callback pour démarrer le pickpocket."""

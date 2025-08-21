@@ -133,5 +133,6 @@ dmypy.json
 .vscode/
 
 # Project specific
+common/global/
 cogs/*/data/
 tests/
