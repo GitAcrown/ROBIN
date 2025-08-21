@@ -13,7 +13,7 @@ from common.economy import EconomyDBManager, BankAccount, Operation, MONEY_SYMBO
 logger = logging.getLogger(f'ROBIN.{__name__.split(".")[-1]}')
 
 # Configuration ==========================================
-JOB_COOLDOWN = 14400  # Cooldown en secondes (4 heures)
+JOB_COOLDOWN = 10800  # Cooldown en secondes (3 heures)
 
 ICONS = {
     'cooking': '<:cooking:1407888355827515545>',
