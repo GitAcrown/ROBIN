@@ -123,6 +123,59 @@ class NavigationButtons(ui.ActionRow['OperationHistoryView']):
             self.update_buttons()
             await interaction.response.edit_message(view=self.view)
 
+class RankingView(ui.LayoutView):
+    """Vue pour afficher le classement des utilisateurs par solde."""
+    def __init__(self, sorted_accounts: list, user_account: BankAccount, user_rank: int, guild: discord.Guild):
+        super().__init__(timeout=300)
+        self.sorted_accounts = sorted_accounts
+        self.user_account = user_account
+        self.user_rank = user_rank
+        self.guild = guild
+        
+        self._setup_layout()
+    
+    def _setup_layout(self):
+        """Configure la mise en page du classement."""
+        container = ui.Container()
+        
+        # En-tête
+        header = ui.TextDisplay(f"## {ICONS['ranking']} Classement · {self.guild.name}")
+        container.add_item(header)
+        container.add_item(ui.Separator())
+        
+        # Top 20
+        ranking_text = "**Top 20 des plus riches :**\n"
+        for i, account in enumerate(self.sorted_accounts[:20], start=1):
+            # Emoji pour les podium
+            if i == 1:
+                emoji = "🥇"
+            elif i == 2:
+                emoji = "🥈" 
+            elif i == 3:
+                emoji = "🥉"
+            else:
+                emoji = f"**{i}.**"
+            
+            ranking_text += f"{emoji} {account.user.mention} · ***{account.balance}{MONEY_SYMBOL}***\n"
+        
+        ranking_display = ui.TextDisplay(ranking_text)
+        container.add_item(ranking_display)
+        
+        # Rang de l'utilisateur s'il n'est pas dans le top 20
+        if self.user_rank and self.user_rank > 20:
+            container.add_item(ui.Separator())
+            user_section_text = f"**Votre position :**\n**{self.user_rank}.** {self.user_account.user.mention} · ***{self.user_account.balance}{MONEY_SYMBOL}***"
+            user_section = ui.TextDisplay(user_section_text)
+            container.add_item(user_section)
+        
+        # Footer
+        container.add_item(ui.Separator())
+        footer_text = f"*Total de {len(self.sorted_accounts)} comptes sur ce serveur*"
+        footer = ui.TextDisplay(footer_text)
+        container.add_item(footer)
+        
+        self.add_item(container)
+
 class OperationHistoryView(ui.LayoutView):
     def __init__(self, account: BankAccount):
         super().__init__(timeout=300)
@@ -281,6 +334,31 @@ class Bank(commands.Cog):
             view=view,
             allowed_mentions=discord.AllowedMentions.none()
         )
+        
+    @app_commands.command(name='ranking')
+    @app_commands.guild_only()
+    async def cmd_ranking(self, interaction: discord.Interaction):
+        """Affiche le classement des utilisateurs par solde."""
+        guild = interaction.guild
+        members = guild.members
+        accounts = self.eco.get_accounts(members)
+        
+        # Trier les comptes par solde
+        sorted_accounts = sorted(accounts, key=lambda acc: acc.balance, reverse=True)
+        if not sorted_accounts:
+            return await interaction.response.send_message("Aucun compte trouvé dans ce serveur.", ephemeral=True)
+        
+        # Trouver le rang de l'utilisateur qui a lancé la commande
+        user_account = self.eco.get_account(interaction.user)
+        user_rank = None
+        for i, account in enumerate(sorted_accounts, start=1):
+            if account.user.id == interaction.user.id:
+                user_rank = i
+                break
+        
+        # Créer la vue LayoutView
+        view = RankingView(sorted_accounts, user_account, user_rank, guild)
+        await interaction.response.send_message(view=view)
         
     @app_commands.command(name='transfer')
     @app_commands.guild_only()
