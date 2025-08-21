@@ -313,15 +313,15 @@ class Bank(commands.Cog):
         
     # ADMINISTRATION ---------------------------------
     
-    @app_commands.command(name='amend')
+    @app_commands.command(name='adjust')
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.rename(user='utilisateur', amount='montant', reason='raison')
-    async def cmd_amend(self, interaction: discord.Interaction, user: discord.User, amount: int, reason: Optional[app_commands.Range[str, 1, 32]] = None):
+    async def cmd_adjust(self, interaction: discord.Interaction, user: discord.User, amount: int, reason: Optional[app_commands.Range[str, 1, 32]] = None):
         """Ajoute ou retire de l'argent à un utilisateur.
         
         :param user: Utilisateur à modifier
         :param amount: Montant à ajouter (positif) ou retirer (négatif)
-        :param reason: Raison de l'amendement (optionnel)
+        :param reason: Raison de la modification (optionnel)
         """
         account = self.eco.get_account(user)
         if not account:
