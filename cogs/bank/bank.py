@@ -237,11 +237,7 @@ class OperationHistoryView(ui.LayoutView):
         
         container = ui.Container()
         
-        # En-tête avec indicateur d'expiration si nécessaire
-        if self.is_finished():
-            header = ui.TextDisplay(f"## {ICONS['robin']} Historique des opérations · {self.account.user.mention} *(Expiré)*")
-        else:
-            header = ui.TextDisplay(f"## {ICONS['robin']} Historique des opérations · {self.account.user.mention}")
+        header = ui.TextDisplay(f"## {ICONS['robin']} Historique des opérations · {self.account.user.mention}")
         container.add_item(header)
         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.large))
         
@@ -334,7 +330,7 @@ class OperationHistoryView(ui.LayoutView):
         # Mettre à jour le message Discord si possible
         if self.message:
             try:
-                await self.message.edit(view=self)
+                await self.message.edit(view=self, allowed_mentions=discord.AllowedMentions.none())
             except discord.HTTPException:
                 pass  # Le message n'existe plus ou autre erreur
 
