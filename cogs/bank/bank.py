@@ -11,6 +11,7 @@ from common import dataio
 from common.economy import EconomyDBManager, BankAccount, Operation, MONEY_SYMBOL
 
 from cogs.banners.banners import Banners, BannerData
+from common.cooldowns import get_all_cooldowns, update_cooldown_expiration
 
 logger = logging.getLogger(f'ROBIN.{__name__.split(".")[-1]}')
 
@@ -523,7 +524,7 @@ class Bank(commands.Cog):
             op = account.withdraw(-amount, f"Modif. par {interaction.user.name}" + (f" ({reason})" if reason else ""))
             result = f"**RETIRÉ** · -{-amount}{MONEY_SYMBOL} de {user.mention}."
         await interaction.response.send_message(
-            f"{result}\n**Nouveau solde** · *{account.balance}{MONEY_SYMBOL}*",
+            f"{result}\n**Nouveau solde** · *{account.balance}{MONEY_SYMBOL}*\n-# Opération #{op.id}",
             allowed_mentions=discord.AllowedMentions(users=[user])
         )
         # Log l'opération
@@ -555,6 +556,28 @@ class Bank(commands.Cog):
         
         # Log l'opération
         logger.info(f"i --- {interaction.user.name} a annulé {len(opes)} opérations du compte de {user.name} jusqu'à l'opération #{operation_id}")
+        
+    @admin_group.command(name='clearcd')
+    @app_commands.rename(user='utilisateur')
+    async def cmd_removecd(self, interaction: discord.Interaction, user: discord.User):
+        """Supprime tous les cooldowns d'un utilisateur.
+        
+        :param user: Utilisateur dont supprimer les cooldowns
+        """
+        cooldowns = get_all_cooldowns(user)
+        if not cooldowns:
+            return await interaction.response.send_message(f"Aucun cooldown actif trouvé pour ***{user.name}***.", ephemeral=True)
+        
+        for cd in cooldowns:
+            update_cooldown_expiration(user, cd.cooldown_name, new_duration=0)
+        
+        await interaction.response.send_message(
+            f"**COOLDOWNS SUPPRIMÉS** · {len(cooldowns)} cooldowns supprimés pour {user.mention}.",
+            allowed_mentions=discord.AllowedMentions(users=[user])
+        )
+        
+        # Log l'opération
+        logger.info(f"i --- {interaction.user.name} a supprimé {len(cooldowns)} cooldowns de {user.name}")
         
 async def setup(bot):
     await bot.add_cog(Bank(bot))

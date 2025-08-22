@@ -18,7 +18,8 @@ logger = logging.getLogger(f'ROBIN.{__name__.split(".")[-1]}')
 ICONS = {
     'cooking': '<:cooking:1407888355827515545>',
     'delivery': '<:delivery:1407892548923559966>',
-    'pickpocket': '<:pickpocket:1407902184871301252>'
+    'pickpocket': '<:pickpocket:1407902184871301252>',
+    'hacker': '💻'
 }
 
 # Jobs ==========================================
@@ -110,6 +111,57 @@ PICKPOCKET_EVENTS = [
         "text": "`📱` Pendant que quelqu'un regarde son téléphone, vous lui prenez sa monnaie !",
         "amount_range": (3, 10)
     }
+]
+
+# Hacker ---------------------------
+HACKER_REWARDS = {
+    "facile": (25, 40),
+    "moyen": (40, 65),
+    "difficile": (60, 85)
+}
+
+HACKER_SEQUENCES = [
+    # Facile (12 scénarios)
+    {"code": "A1B2C3", "hint": "[Logique] Alternance lettres/chiffres", "difficulty": "facile"},
+    {"code": "XYZABC", "hint": "[Logique] Fin + début de l'alphabet", "difficulty": "facile"},
+    {"code": "147258369", "hint": "[Tech] Colonnes du pavé numérique", "difficulty": "facile"},
+    {"code": "QWERTY", "hint": "[Tech] Disposition clavier la plus courante", "difficulty": "facile"},
+    {"code": "123ABC", "hint": "[Logique] Chiffres puis lettres", "difficulty": "facile"},
+    {"code": "AZERTY", "hint": "[Tech] Disposition clavier française", "difficulty": "facile"},
+    {"code": "PASSWORD", "hint": "[Tech] Le mot de passe le plus courant", "difficulty": "facile"},
+    {"code": "ADMIN", "hint": "[Tech] Compte administrateur par défaut", "difficulty": "facile"},
+    {"code": "PIZZA", "hint": "[Nourriture] Plat italien rond et garni", "difficulty": "facile"},
+    {"code": "CHIEN", "hint": "[Animal] Meilleur ami de l'homme", "difficulty": "facile"},
+    {"code": "ROUGE", "hint": "[Couleur] Couleur du sang", "difficulty": "facile"},
+    {"code": "LUNDI", "hint": "[Temps] Premier jour de la semaine", "difficulty": "facile"},
+    
+    # Moyen (12 scénarios)
+    {"code": "FIREWALL", "hint": "[Informatique] Protection informatique", "difficulty": "moyen"},
+    {"code": "BACKDOOR", "hint": "[Informatique] Accès secret", "difficulty": "moyen"},
+    {"code": "MALWARE", "hint": "[Informatique] Logiciel malveillant", "difficulty": "moyen"},
+    {"code": "PHISHING", "hint": "[Informatique] Hameçonnage par email", "difficulty": "moyen"},
+    {"code": "BAGUETTE", "hint": "[France] Pain traditionnel français", "difficulty": "moyen"},
+    {"code": "MINECRAFT", "hint": "[Jeu vidéo] Jeu de construction en blocs", "difficulty": "moyen"},
+    {"code": "NAPOLEON", "hint": "[Histoire] Empereur français célèbre", "difficulty": "moyen"},
+    {"code": "CROISSANT", "hint": "[Nourriture] Viennoiserie française", "difficulty": "moyen"},
+    {"code": "POKEMON", "hint": "[Culture pop] Attrapez-les tous !", "difficulty": "moyen"},
+    {"code": "DRACAUFEU", "hint": "[Jeu vidéo] Dragon de type feu et vol", "difficulty": "moyen"},
+    {"code": "NUTELLA", "hint": "[Marque] Pâte à tartiner", "difficulty": "moyen"},
+    {"code": "RICKROLL", "hint": "[Internet] Piège musical célèbre", "difficulty": "moyen"},
+    
+    # Difficile (12 scénarios)
+    {"code": "OVERFLOW", "hint": "[Informatique] Dépassement de mémoire", "difficulty": "difficile"},
+    {"code": "KEYLOGGER", "hint": "[Informatique] Surveillant de frappe", "difficulty": "difficile"},
+    {"code": "ROOTKIT", "hint": "[Informatique] Outil d'accès root caché", "difficulty": "difficile"},
+    {"code": "SPYWARE", "hint": "[Informatique] Logiciel espion", "difficulty": "difficile"},
+    {"code": "B64DECODE", "hint": "[Informatique] Encodage classique web", "difficulty": "difficile"},
+    {"code": "SQLINJECTION", "hint": "[Informatique] Attaque de base de données", "difficulty": "difficile"},
+    {"code": "BRUTEFORCE", "hint": "[Informatique] Méthode de cassage par force", "difficulty": "difficile"},
+    {"code": "ZERODAY", "hint": "[Informatique] Faille inédite et inconnue", "difficulty": "difficile"},
+    {"code": "RANSOMWARE", "hint": "[Informatique] Logiciel de rançon", "difficulty": "difficile"},
+    {"code": "CRYPTOCURRENCY", "hint": "[Informatique] Monnaie numérique décentralisée", "difficulty": "difficile"},
+    {"code": "SUPERCALIFRAGILISTIQUE", "hint": "[Cinéma] Mot inventé de Mary Poppins", "difficulty": "difficile"},
+    {"code": "ANTICONSTITUTIONNELLEMENT", "hint": "[Français] Plus long mot de la langue française", "difficulty": "difficile"}
 ]
 
 # Cuisinier --------------------------- ---------------------------
@@ -515,6 +567,136 @@ class PickpocketGameView(ui.LayoutView):
         self.add_item(container)
         await interaction.response.edit_message(view=self)
 
+# Hacker Game View ---------------------------
+class HackerGameView(ui.LayoutView):
+    """Vue pour le mini-jeu de hacking avec déchiffrage de code."""
+    def __init__(self, account: BankAccount, user: discord.User):
+        super().__init__(timeout=120)  # 2 minutes pour résoudre
+        self.account = account
+        self.user = user
+        self.sequence_data = random.choice(HACKER_SEQUENCES)
+        self.solved = False
+        
+        self._setup_layout()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Vérifie que seul l'utilisateur qui a lancé la commande peut interagir."""
+        if interaction.user != self.user:
+            await interaction.response.send_message("Vous ne pouvez pas utiliser ce menu.", ephemeral=True)
+            return False
+        return True
+    
+    def _setup_layout(self):
+        """Configure la mise en page du mini-jeu."""
+        container = ui.Container()
+        
+        # En-tête
+        header = ui.TextDisplay(f"## {ICONS['hacker']} Piratage de système")
+        container.add_item(header)
+        container.add_item(ui.Separator())
+        
+        # Informations sur la mission
+        mission_text = ui.TextDisplay(
+            f"**Difficulté** · {self.sequence_data['difficulty'].title()}\n"
+            f"**Indice** · *{self.sequence_data['hint']}*"
+        )
+        container.add_item(mission_text)
+        
+        # Code à deviner (masqué)
+        code_length = len(self.sequence_data["code"])
+        masked_code = "▪" * code_length
+        code_text = ui.TextDisplay(f"### Mot de passe à décrypter : `{masked_code}` ({code_length} lettres)")
+        container.add_item(code_text)
+        
+        # Input modal trigger
+        hack_button = HackAttemptButton()
+        button_section = ui.Section(
+            ui.TextDisplay("**Entrez le mot de passe que vous pensez avoir trouvé :**"),
+            accessory=hack_button
+        )
+        container.add_item(button_section)
+        
+        self.add_item(container)
+    
+    async def attempt_hack(self, interaction: discord.Interaction, guess: str):
+        """Traite une tentative de piratage."""
+        guess = guess.upper().strip()
+        
+        # Vider le contenu actuel
+        self.clear_items()
+        container = ui.Container()
+        
+        # En-tête
+        header = ui.TextDisplay(f"## {ICONS['hacker']} Piratage de système")
+        container.add_item(header)
+        container.add_item(ui.Separator())
+        
+        if guess == self.sequence_data["code"]:
+            # Réussite !
+            self.solved = True
+            
+            # Affichage du succès
+            success_text = ui.TextDisplay("**Excellent !** Vous avez décrypté le mot de passe !")
+            container.add_item(success_text)
+            
+            code_text = ui.TextDisplay(f"### Mot de passe décrypté : `{self.sequence_data['code']}` ✅")
+            container.add_item(code_text)
+            
+            # Récompense
+            reward = random.randint(HACKER_REWARDS[self.sequence_data["difficulty"]][0], HACKER_REWARDS[self.sequence_data["difficulty"]][1])
+            self.account.deposit(reward, f"Hacking réussi - {self.sequence_data['difficulty']}")
+            
+            container.add_item(ui.Separator())
+            success_reward = ui.TextDisplay(
+                f"**Mission accomplie !**\n"
+                f"**Récompense** · *+{reward}{MONEY_SYMBOL}*\n"
+                f"**Nouveau solde** · ***{self.account.balance}{MONEY_SYMBOL}***"
+            )
+            container.add_item(success_reward)
+        else:
+            # Échec
+            failure_text = ui.TextDisplay("**Mot de passe incorrect !** Tentative échouée.")
+            container.add_item(failure_text)
+            
+            container.add_item(ui.Separator())
+            failure_info = ui.TextDisplay(
+                f"**Piratage échoué !**\n"
+                f"*Le mot de passe n'est pas déchiffré...*\n"
+                f"**Aucune récompense**"
+            )
+            container.add_item(failure_info)
+        
+        self.add_item(container)
+        await interaction.response.edit_message(view=self)
+        self.stop()
+
+class HackAttemptButton(ui.Button['HackerGameView']):
+    """Bouton pour tenter de déchiffrer le code."""
+    def __init__(self):
+        super().__init__(label="Entrer le mot de passe", style=discord.ButtonStyle.primary)
+    
+    async def callback(self, interaction: discord.Interaction):
+        """Ouvre un modal pour entrer la tentative."""
+        modal = HackModal(self.view)
+        await interaction.response.send_modal(modal)
+
+class HackModal(ui.Modal):
+    """Modal pour entrer le mot de passe."""
+    def __init__(self, game_view: HackerGameView):
+        super().__init__(title="Décryptage du mot de passe")
+        self.game_view = game_view
+    
+    code_input = ui.TextInput(
+        label="Votre tentative",
+        placeholder="Entrez le mot de passe que vous pensez avoir trouvé...",
+        max_length=20,
+        required=True
+    )
+    
+    async def on_submit(self, interaction: discord.Interaction):
+        """Traite la soumission du mot de passe."""
+        await self.game_view.attempt_hack(interaction, self.code_input.value)
+
 class PickpocketButton(ui.Button['PickpocketGameView']):
     """Bouton pour commencer le pickpocket."""
     def __init__(self):
@@ -539,9 +721,10 @@ class Jobs(commands.Cog):
     @app_commands.rename(work_type="travail")
     @app_commands.choices(
         work_type=[
-            app_commands.Choice(name="Livreur (+ Aléatoire)", value="livreur"),
-            app_commands.Choice(name="Cuisinier (+ Gains)", value="cuisinier"),
-            app_commands.Choice(name="Pickpocket (+ Social)", value="pickpocket"),
+            app_commands.Choice(name="Livreur (Aléatoire)", value="livreur"),
+            app_commands.Choice(name="Cuisinier (Choix multiple)", value="cuisinier"),
+            app_commands.Choice(name="Pickpocket (Vol)", value="pickpocket"),
+            app_commands.Choice(name="Hacker (Déchiffrage)", value="hacker")
         ])
     @command_cooldown(10800, cooldown_name="Travail")  # Cooldown de 3 heures
     async def cmd_job(self, interaction: discord.Interaction, work_type: str):
@@ -584,11 +767,15 @@ class Jobs(commands.Cog):
             
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
             
+        elif work_type.lower() == "hacker":
+            account = self.eco.get_account(interaction.user)
+            
+            # Créer la vue du mini-jeu de hacking
+            view = HackerGameView(account, interaction.user)
+            
+            await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            
         else:
-            await interaction.response.send_message(
-                "**ERREUR** · Ce type de travail n'est pas encore implémenté.",
-                ephemeral=True
-            )
             await interaction.response.send_message(
                 "**ERREUR** · Ce type de travail n'est pas encore implémenté.",
                 ephemeral=True

@@ -134,6 +134,97 @@ class CooldownManager:
         with closing(self.conn.cursor()) as cursor:
             cursor.execute('SELECT DISTINCT bucket_key FROM cooldowns WHERE expires_at > ?', (current_time,))
             return [row['bucket_key'] for row in cursor.fetchall()]
+    
+    def get_entities_with_cooldown(self, cooldown_name: str) -> list[dict]:
+        """
+        Retourne toutes les entités ayant un cooldown spécifique actif.
+        
+        Args:
+            cooldown_name: Nom du cooldown à rechercher
+            
+        Returns:
+            list[dict]: Liste de dictionnaires contenant les informations des entités
+                       Format: {'bucket_key': str, 'entity_type': str, 'entity_id': str, 'cooldown': Cooldown}
+        """
+        current_time = int(time.time())
+        entities = []
+        
+        with closing(self.conn.cursor()) as cursor:
+            cursor.execute(
+                'SELECT * FROM cooldowns WHERE cooldown_name = ? AND expires_at > ? ORDER BY expires_at ASC',
+                (cooldown_name, current_time)
+            )
+            rows = cursor.fetchall()
+            
+            for row in rows:
+                cooldown = Cooldown.from_row(row)
+                bucket_key = row['bucket_key']
+                
+                # Parse le bucket_key pour extraire le type et l'ID
+                if '_' in bucket_key:
+                    entity_type, entity_id = bucket_key.split('_', 1)
+                else:
+                    entity_type = 'unknown'
+                    entity_id = bucket_key
+                
+                entities.append({
+                    'bucket_key': bucket_key,
+                    'entity_type': entity_type,
+                    'entity_id': entity_id,
+                    'cooldown': cooldown
+                })
+        
+        return entities
+    
+    def get_cooldown_statistics(self, cooldown_name: str) -> dict:
+        """
+        Retourne des statistiques sur un cooldown spécifique.
+        
+        Args:
+            cooldown_name: Nom du cooldown à analyser
+            
+        Returns:
+            dict: Statistiques du cooldown
+        """
+        current_time = int(time.time())
+        
+        with closing(self.conn.cursor()) as cursor:
+            # Cooldowns actifs
+            cursor.execute(
+                'SELECT COUNT(*) as active_count FROM cooldowns WHERE cooldown_name = ? AND expires_at > ?',
+                (cooldown_name, current_time)
+            )
+            active_count = cursor.fetchone()['active_count']
+            
+            # Cooldowns expirés (historique)
+            cursor.execute(
+                'SELECT COUNT(*) as expired_count FROM cooldowns WHERE cooldown_name = ? AND expires_at <= ?',
+                (cooldown_name, current_time)
+            )
+            expired_count = cursor.fetchone()['expired_count']
+            
+            # Types d'entités avec ce cooldown
+            cursor.execute(
+                'SELECT DISTINCT bucket_key FROM cooldowns WHERE cooldown_name = ? AND expires_at > ?',
+                (cooldown_name, current_time)
+            )
+            bucket_keys = [row['bucket_key'] for row in cursor.fetchall()]
+            
+            entity_types = {}
+            for key in bucket_keys:
+                if '_' in key:
+                    entity_type = key.split('_', 1)[0]
+                    entity_types[entity_type] = entity_types.get(entity_type, 0) + 1
+                else:
+                    entity_types['unknown'] = entity_types.get('unknown', 0) + 1
+        
+        return {
+            'cooldown_name': cooldown_name,
+            'active_count': active_count,
+            'expired_count': expired_count,
+            'total_count': active_count + expired_count,
+            'entity_types': entity_types
+        }
 
 
 class CooldownBucket:
@@ -209,6 +300,48 @@ class CooldownBucket:
                 )
             return False
         return True
+    
+    def update_expiration(self, cooldown_name: str, new_duration: Union[int, float] = None, new_expires_at: int = None) -> bool:
+        """
+        Met à jour l'expiration d'un cooldown existant.
+        
+        Args:
+            cooldown_name: Nom du cooldown à modifier
+            new_duration: Nouvelle durée en secondes depuis maintenant (optionnel)
+            new_expires_at: Nouveau timestamp d'expiration absolu (optionnel)
+            
+        Returns:
+            bool: True si le cooldown a été mis à jour, False s'il n'existe pas
+            
+        Note:
+            Si new_duration ET new_expires_at sont fournis, new_expires_at prendra la priorité.
+        """
+        if new_duration is None and new_expires_at is None:
+            raise ValueError("Au moins un paramètre (new_duration ou new_expires_at) doit être fourni")
+        
+        # Vérifie d'abord si le cooldown existe
+        cooldown = self.get(cooldown_name)
+        if not cooldown:
+            return False
+        
+        # Calcule le nouveau timestamp d'expiration
+        if new_expires_at is not None:
+            expires_at = new_expires_at
+        else:
+            current_time = int(time.time())
+            expires_at = current_time + int(new_duration)
+        
+        with closing(self.manager.conn.cursor()) as cursor:
+            cursor.execute(
+                'UPDATE cooldowns SET expires_at = ? WHERE bucket_key = ? AND cooldown_name = ?',
+                (expires_at, self.bucket_key, cooldown_name)
+            )
+            updated = cursor.rowcount > 0
+            self.manager.conn.commit()
+        
+        if updated:
+            logger.debug(f"Cooldown '{cooldown_name}' du bucket '{self.bucket_key}' mis à jour (nouvelle expiration: {expires_at})")
+        return updated
     
     def remove(self, cooldown_name: str) -> bool:
         """Supprime un cooldown spécifique de ce bucket."""
@@ -588,4 +721,65 @@ def get_remaining_time(entity: Any, cooldown_name: str) -> float:
     """Récupère rapidement le temps restant d'un cooldown."""
     bucket = get_bucket(entity)
     return bucket.remaining(cooldown_name)
+
+def update_cooldown_expiration(entity: Any, cooldown_name: str, 
+                             new_duration: Union[int, float] = None, 
+                             new_expires_at: int = None) -> bool:
+    """
+    Met à jour l'expiration d'un cooldown pour une entité.
+    
+    Args:
+        entity: L'entité (User, Guild, Channel, etc.)
+        cooldown_name: Nom du cooldown à modifier
+        new_duration: Nouvelle durée en secondes depuis maintenant (optionnel)
+        new_expires_at: Nouveau timestamp d'expiration absolu (optionnel)
+        
+    Returns:
+        bool: True si le cooldown a été mis à jour, False s'il n'existe pas
+        
+    Examples:
+        # Étendre le cooldown de 30 minutes supplémentaires
+        update_cooldown_expiration(user, "daily_bonus", new_duration=1800)
+        
+        # Définir une expiration absolue
+        update_cooldown_expiration(guild, "event_cd", new_expires_at=1692720000)
+    """
+    bucket = get_bucket(entity)
+    return bucket.update_expiration(cooldown_name, new_duration, new_expires_at)
+
+def get_entities_with_cooldown(cooldown_name: str) -> list[dict]:
+    """
+    Récupère toutes les entités ayant un cooldown spécifique actif.
+    
+    Args:
+        cooldown_name: Nom du cooldown à rechercher
+        
+    Returns:
+        list[dict]: Liste des entités avec leurs informations
+        
+    Example:
+        entities = get_entities_with_cooldown("daily_bonus")
+        for entity in entities:
+            print(f"{entity['entity_type']} {entity['entity_id']} expire dans {entity['cooldown'].remaining_time()}s")
+    """
+    manager = CooldownManager()
+    return manager.get_entities_with_cooldown(cooldown_name)
+
+def get_cooldown_statistics(cooldown_name: str) -> dict:
+    """
+    Récupère des statistiques détaillées sur un cooldown spécifique.
+    
+    Args:
+        cooldown_name: Nom du cooldown à analyser
+        
+    Returns:
+        dict: Statistiques complètes du cooldown
+        
+    Example:
+        stats = get_cooldown_statistics("daily_bonus")
+        print(f"Cooldown actif sur {stats['active_count']} entités")
+        print(f"Types d'entités: {stats['entity_types']}")
+    """
+    manager = CooldownManager()
+    return manager.get_cooldown_statistics(cooldown_name)
     
