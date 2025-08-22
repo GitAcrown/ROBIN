@@ -495,6 +495,9 @@ class Bank(commands.Cog):
         :param user: Utilisateur dont annuler les opérations
         :param operation_id: ID de l'opération jusqu'à laquelle annuler (incluse)
         """
+        if '#' in operation_id:
+            operation_id = operation_id.replace('#', '')
+        
         account = self.eco.get_account(user)
         if not account:
             return await interaction.response.send_message(f"Aucun compte trouvé pour {user.name}.", ephemeral=True)
