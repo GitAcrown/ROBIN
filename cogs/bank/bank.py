@@ -114,7 +114,7 @@ class NavigationButtons(ui.ActionRow['OperationHistoryView']):
             self.view.current_page = 0
             self.view.update_display()
             self.update_buttons()
-            await interaction.response.edit_message(view=self.view)
+            await interaction.response.edit_message(view=self.view, allowed_mentions=discord.AllowedMentions.none())
     
     @ui.button(label='<', style=discord.ButtonStyle.secondary)
     async def previous_page(self, interaction: discord.Interaction, button: ui.Button):
@@ -134,7 +134,7 @@ class NavigationButtons(ui.ActionRow['OperationHistoryView']):
             self.view.current_page += 1
             self.view.update_display()
             self.update_buttons()
-            await interaction.response.edit_message(view=self.view)
+            await interaction.response.edit_message(view=self.view, allowed_mentions=discord.AllowedMentions.none())
     
     @ui.button(label='>>', style=discord.ButtonStyle.secondary)
     async def last_page(self, interaction: discord.Interaction, button: ui.Button):
@@ -142,7 +142,7 @@ class NavigationButtons(ui.ActionRow['OperationHistoryView']):
             self.view.current_page = len(self.view.pages) - 1
             self.view.update_display()
             self.update_buttons()
-            await interaction.response.edit_message(view=self.view)
+            await interaction.response.edit_message(view=self.view, allowed_mentions=discord.AllowedMentions.none())
 
 class RankingView(ui.LayoutView):
     """Vue pour afficher le classement des utilisateurs par solde."""

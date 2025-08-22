@@ -205,7 +205,7 @@ class RouletteView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Tableau des gains
-        gains_table = ui.TextDisplay('**Tableau des gains :**\n```\nRouge/Noir        2x\nPair/Impair       2x\nDouzaines         3x\nNuméro exact     36x\n```\n*Gains = multiplicateur × votre mise + remboursement*')
+        gains_table = ui.TextDisplay('**Tableau des gains :**\n```\nRouge/Noir        +1x (total 2x)\nPair/Impair       +1x (total 2x)\nDouzaines         +2x (total 3x)\nNuméro exact     +35x (total 36x)\n```\n*Gains nets + remboursement de votre mise*')
         container.add_item(gains_table)
         container.add_item(ui.Separator())
         
@@ -272,33 +272,36 @@ class RouletteView(ui.LayoutView):
         
         if self.bet_type == "couleur":
             if self.bet_value == self.result_color and self.result_number != 0:
-                multiplier = 2
+                multiplier = 1  # 2x au total (mise + 1x mise)
                 win_type = f"{self.bet_value.capitalize()}"
+            # Le zéro fait perdre les paris couleur
         
         elif self.bet_type == "parite":
             if self.result_number == 0:
                 pass  # Le zéro fait perdre les paris pair/impair
             elif self.bet_value == "pair" and self.result_number % 2 == 0:
-                multiplier = 2
+                multiplier = 1  # 2x au total (mise + 1x mise)
                 win_type = "Pair"
             elif self.bet_value == "impair" and self.result_number % 2 == 1:
-                multiplier = 2
+                multiplier = 1  # 2x au total (mise + 1x mise)
                 win_type = "Impair"
         
         elif self.bet_type == "douzaine":
-            if self.bet_value == "1" and 1 <= self.result_number <= 12:
-                multiplier = 3
-                win_type = "Première douzaine"
-            elif self.bet_value == "2" and 13 <= self.result_number <= 24:
-                multiplier = 3
-                win_type = "Deuxième douzaine"
-            elif self.bet_value == "3" and 25 <= self.result_number <= 36:
-                multiplier = 3
-                win_type = "Troisième douzaine"
+            # Le zéro fait perdre les paris douzaine
+            if self.result_number != 0:
+                if self.bet_value == "1" and 1 <= self.result_number <= 12:
+                    multiplier = 2  # 3x au total (mise + 2x mise)
+                    win_type = "Première douzaine"
+                elif self.bet_value == "2" and 13 <= self.result_number <= 24:
+                    multiplier = 2  # 3x au total (mise + 2x mise)
+                    win_type = "Deuxième douzaine"
+                elif self.bet_value == "3" and 25 <= self.result_number <= 36:
+                    multiplier = 2  # 3x au total (mise + 2x mise)
+                    win_type = "Troisième douzaine"
         
         elif self.bet_type == "numero":
             if int(self.bet_value) == self.result_number:
-                multiplier = 36
+                multiplier = 35  # 36x au total (mise + 35x mise)
                 win_type = f"Numéro {self.result_number}"
         
         # Calculer les gains (remboursement + gains)
@@ -333,7 +336,7 @@ class RouletteView(ui.LayoutView):
         
         # Informations détaillées avec style amélioré
         if self.result_number == 0:
-            number_info = "**Zéro** · *Vert - La banque gagne sur pair/impair*"
+            number_info = "**Zéro** · *Vert - La banque gagne (tous les paris simples perdent)*"
         else:
             parity = "Pair" if self.result_number % 2 == 0 else "Impair"
             if 1 <= self.result_number <= 12:
