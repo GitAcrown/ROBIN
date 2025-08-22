@@ -159,9 +159,7 @@ HACKER_SEQUENCES = [
     {"code": "BRUTEFORCE", "hint": "[Informatique] Méthode de cassage par force", "difficulty": "difficile"},
     {"code": "ZERODAY", "hint": "[Informatique] Faille inédite et inconnue", "difficulty": "difficile"},
     {"code": "RANSOMWARE", "hint": "[Informatique] Logiciel de rançon", "difficulty": "difficile"},
-    {"code": "CRYPTOCURRENCY", "hint": "[Informatique] Monnaie numérique décentralisée", "difficulty": "difficile"},
-    {"code": "SUPERCALIFRAGILISTIQUE", "hint": "[Cinéma] Mot inventé de Mary Poppins", "difficulty": "difficile"},
-    {"code": "ANTICONSTITUTIONNELLEMENT", "hint": "[Français] Plus long mot de la langue française", "difficulty": "difficile"}
+    {"code": "CRYPTOCURRENCY", "hint": "[Informatique] Monnaie numérique décentralisée", "difficulty": "difficile"}
 ]
 
 # Cuisinier --------------------------- ---------------------------
