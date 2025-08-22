@@ -44,7 +44,7 @@ class CooldownsView(ui.LayoutView):
         container = ui.Container()
         
         # En-tête avec emoji uniquement dans le titre
-        header = ui.TextDisplay(f"## {ICONS['cooldown']} Cooldowns actifs · {self.user.mention}")
+        header = ui.TextDisplay(f"## {ICONS['cooldown']} Cooldowns · {self.user.mention}")
         container.add_item(header)
         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.large))
     
