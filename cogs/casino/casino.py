@@ -6,6 +6,7 @@ from discord import app_commands, ui
 from discord.ext import commands
 
 from common.economy import EconomyDBManager, BankAccount, MONEY_SYMBOL
+from common.cooldowns import command_cooldown
 
 logger = logging.getLogger('ROBIN.Casino')
 
@@ -430,8 +431,8 @@ class Casino(commands.GroupCog, group_name="casino", description="Mini-jeux d'ar
         return choices[:25]
         
     @app_commands.command(name="slot")
-    @app_commands.checks.cooldown(1, 120)
     @app_commands.rename(bet="mise")
+    @command_cooldown(120, cooldown_name="Machine à sous")
     async def slot_machine(self, interaction: discord.Interaction, bet: app_commands.Range[int, 10, 100]):
         """Jouer à la machine à sous
 
@@ -448,9 +449,9 @@ class Casino(commands.GroupCog, group_name="casino", description="Mini-jeux d'ar
         await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
 
     @app_commands.command(name="roulette")
-    @app_commands.checks.cooldown(1, 120)
     @app_commands.rename(bet="mise", bet_value="valeur")
     @app_commands.autocomplete(bet_value=bet_value_autocomplete)
+    @command_cooldown(120, cooldown_name="Roulette")
     async def cmd_roulette(self, interaction: discord.Interaction, bet: app_commands.Range[int, 20, 200], bet_value: str):
         """Jouer à la roulette européenne
         

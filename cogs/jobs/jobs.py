@@ -9,11 +9,11 @@ from discord.ext import commands
 
 from common import dataio
 from common.economy import EconomyDBManager, BankAccount, Operation, MONEY_SYMBOL
+from common.cooldowns import command_cooldown
 
 logger = logging.getLogger(f'ROBIN.{__name__.split(".")[-1]}')
 
 # Configuration ==========================================
-JOB_COOLDOWN = 10800  # Cooldown en secondes (3 heures)
 
 ICONS = {
     'cooking': '<:cooking:1407888355827515545>',
@@ -535,41 +535,6 @@ class Jobs(commands.Cog):
         self.eco = EconomyDBManager()
         self.job_cooldowns = {}  # Dictionnaire pour stocker les cooldowns des utilisateurs
     
-    def _check_cooldown(self, user_id: int) -> tuple[bool, int]:
-        """Vérifie si l'utilisateur est en cooldown.
-        
-        Returns:
-            tuple: (is_on_cooldown, remaining_seconds)
-        """
-        now = datetime.now()
-        if user_id in self.job_cooldowns:
-            last_job = self.job_cooldowns[user_id]
-            time_passed = (now - last_job).total_seconds()
-            if time_passed < JOB_COOLDOWN:
-                remaining = int(JOB_COOLDOWN - time_passed)
-                return True, remaining
-        return False, 0
-    
-    def _set_cooldown(self, user_id: int):
-        """Définit le cooldown pour un utilisateur."""
-        self.job_cooldowns[user_id] = datetime.now()
-    
-    def _format_cooldown_time(self, seconds: int) -> str:
-        """Formate le temps de cooldown en format lisible."""
-        hours = seconds // 3600
-        minutes = (seconds % 3600) // 60
-        remaining_seconds = seconds % 60
-        
-        parts = []
-        if hours > 0:
-            parts.append(f"{hours}h")
-        if minutes > 0:
-            parts.append(f"{minutes}m")
-        if remaining_seconds > 0 and hours == 0:  # Afficher les secondes seulement si < 1h
-            parts.append(f"{remaining_seconds}s")
-        
-        return " ".join(parts) if parts else "0s"
-    
     @app_commands.command(name="work")
     @app_commands.rename(work_type="travail")
     @app_commands.choices(
@@ -578,24 +543,15 @@ class Jobs(commands.Cog):
             app_commands.Choice(name="Cuisinier (+ Gains)", value="cuisinier"),
             app_commands.Choice(name="Pickpocket (+ Social)", value="pickpocket"),
         ])
+    @command_cooldown(10800, cooldown_name="Travail")  # Cooldown de 3 heures
     async def cmd_job(self, interaction: discord.Interaction, work_type: str):
         """Effectuer une tâche pour gagner de l'argent
         
         :param work_type: Travail à effectuer"""
         
-        # Vérifier le cooldown
-        is_on_cooldown, remaining = self._check_cooldown(interaction.user.id)
-        if is_on_cooldown:
-            cooldown_text = self._format_cooldown_time(remaining)
-            return await interaction.response.send_message(
-                f"**Repos requis** · Vous devez attendre encore **{cooldown_text}** avant de pouvoir retravailler.",
-                ephemeral=True
-            )
-        
         if work_type.lower() == "livreur":
             account = self.eco.get_account(interaction.user)
             view = DeliveryGameView(account, interaction.user)
-            self._set_cooldown(interaction.user.id)  # Définir le cooldown
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
             
         elif work_type.lower() == "cuisinier":
@@ -614,7 +570,6 @@ class Jobs(commands.Cog):
             
             # Créer la vue du mini-jeu
             view = CookGameView(account, plat, ingredients, interaction.user)
-            self._set_cooldown(interaction.user.id)  # Définir le cooldown
             
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
             
@@ -626,7 +581,6 @@ class Jobs(commands.Cog):
             
             # Créer la vue du mini-jeu
             view = PickpocketGameView(account, guild_members, interaction.user)
-            self._set_cooldown(interaction.user.id)  # Définir le cooldown
             
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
             
