@@ -517,7 +517,7 @@ class Bank(commands.Cog):
     @cmd_rollback.autocomplete('operation_id')
     async def autocomplete_operation_id(self, interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
         """Fournit des suggestions pour l'autocomplétion de l'ID d'opération."""
-        user = interaction.namespace.user
+        user = interaction.namespace['user']
         if not user:
             return []
         
