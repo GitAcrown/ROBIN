@@ -128,6 +128,15 @@ class CooldownManager:
         logger.debug(f"Nettoyé {deleted_count} cooldowns expirés")
         return deleted_count
     
+    def delete_all(self) -> int:
+        """Supprime tous les cooldowns de la base de données."""
+        with closing(self.conn.cursor()) as cursor:
+            cursor.execute('DELETE FROM cooldowns')
+            deleted_count = cursor.rowcount
+            self.conn.commit()
+        logger.debug(f"Supprimé tous les cooldowns ({deleted_count} supprimés)")
+        return deleted_count
+    
     def get_all_active_buckets(self) -> list[str]:
         """Retourne toutes les clés de buckets ayant des cooldowns actifs."""
         current_time = int(time.time())
@@ -614,21 +623,34 @@ def command_cooldown(duration: Union[int, float],
     return decorator
 
 
-def require_no_cooldown(cooldown_name: str, 
-                       on_entity: Any = None,
-                       error_message: str = None):
+def check_cooldown_state(cooldown_name: str, 
+                          active: bool = False,
+                          on_entity: Any = None,
+                          error_message: str = None):
     """
-    Décorateur qui vérifie qu'un cooldown n'est pas actif avant d'exécuter.
+    Décorateur qui vérifie l'état d'un cooldown avant d'exécuter.
     
     Args:
         cooldown_name: Nom du cooldown à vérifier
+        active: True = le cooldown doit être actif, False = le cooldown ne doit pas être actif
         on_entity: Entité spécifique (si None, utilise l'utilisateur par défaut)
         error_message: Message d'erreur personnalisé
+        
+    Examples:
+        @require_cooldown_state("punishment_timeout", active=True)
+        async def restricted_command(self, ctx):
+            # Ne fonctionne que si l'utilisateur a un timeout actif
+            pass
+            
+        @require_cooldown_state("spam_protection", active=False)
+        async def normal_command(self, ctx):
+            # Ne fonctionne que si pas de cooldown de spam
+            pass
     """
     def decorator(func):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
-            # Même logique de détection de contexte
+            # Détection du contexte
             ctx = None
             interaction = None
             
@@ -660,33 +682,59 @@ def require_no_cooldown(cooldown_name: str,
             manager = CooldownManager()
             bucket = manager.get(entity)
             
-            try:
-                bucket.check(cooldown_name)
-            except CooldownActiveError as e:
-                # Récupère le cooldown pour utiliser la méthode de formatage
-                cooldown = bucket.get(cooldown_name)
-                
+            cooldown_exists = bucket.has(cooldown_name)
+            
+            # Vérifie si l'état correspond à ce qui est attendu
+            if active and not cooldown_exists:
+                # On veut un cooldown actif mais il n'y en a pas
                 if error_message:
                     msg = error_message
-                elif cooldown:
-                    msg = cooldown.format_cooldown_message()
                 else:
-                    remaining = int(e.remaining_time)
-                    msg = f"Action bloquée par un cooldown ({remaining}s restantes)"
-                
-                if interaction:
-                    if interaction.response.is_done():
-                        await interaction.followup.send(msg, ephemeral=True)
+                    msg = f"Cette action nécessite un cooldown actif '{cooldown_name}' qui n'est pas présent."
+                    
+            elif not active and cooldown_exists:
+                # On ne veut pas de cooldown mais il y en a un
+                try:
+                    bucket.check(cooldown_name)  # Ceci va lever CooldownActiveError
+                except CooldownActiveError as e:
+                    if error_message:
+                        msg = error_message
                     else:
-                        await interaction.response.send_message(msg, ephemeral=True)
-                else:
-                    await ctx.send(msg)
-                return
+                        # Récupère le cooldown pour utiliser la méthode de formatage
+                        cooldown = bucket.get(cooldown_name)
+                        if cooldown:
+                            msg = cooldown.format_cooldown_message()
+                        else:
+                            remaining = int(e.remaining_time)
+                            msg = f"Action bloquée par un cooldown ({remaining}s restantes)"
+                            
+            else:
+                # L'état correspond, on peut exécuter
+                return await func(*args, **kwargs)
             
-            return await func(*args, **kwargs)
+            # Si on arrive ici, il y a une erreur à envoyer
+            if interaction:
+                if interaction.response.is_done():
+                    await interaction.followup.send(msg, ephemeral=True)
+                else:
+                    await interaction.response.send_message(msg, ephemeral=True)
+            else:
+                await ctx.send(msg)
+            return
         
         return wrapper
     return decorator
+
+
+# Alias pour la compatibilité ascendante
+def require_cooldown(cooldown_name: str, on_entity: Any = None, error_message: str = None):
+    """Alias pour require_cooldown_state avec active=True"""
+    return check_cooldown_state(cooldown_name, active=True, on_entity=on_entity, error_message=error_message)
+
+
+def require_no_cooldown(cooldown_name: str, on_entity: Any = None, error_message: str = None):
+    """Alias pour require_cooldown_state avec active=False"""
+    return check_cooldown_state(cooldown_name, active=False, on_entity=on_entity, error_message=error_message)
 
 
 # Fonctions utilitaires ================================================
@@ -716,6 +764,11 @@ def check_cooldown(entity: Any, cooldown_name: str) -> bool:
     """Vérifie rapidement si une entité a un cooldown actif."""
     bucket = get_bucket(entity)
     return bucket.has(cooldown_name)
+
+def reset_cooldowns() -> int:
+    """Supprime tous les cooldowns de la base de données."""
+    manager = CooldownManager()
+    return manager.delete_all()
 
 def get_remaining_time(entity: Any, cooldown_name: str) -> float:
     """Récupère rapidement le temps restant d'un cooldown."""

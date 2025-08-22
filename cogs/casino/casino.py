@@ -432,7 +432,7 @@ class Casino(commands.GroupCog, group_name="casino", description="Mini-jeux d'ar
         
     @app_commands.command(name="slot")
     @app_commands.rename(bet="mise")
-    @command_cooldown(120, cooldown_name="Machine à sous")
+    @command_cooldown(120, cooldown_name="slot")
     async def slot_machine(self, interaction: discord.Interaction, bet: app_commands.Range[int, 10, 100]):
         """Jouer à la machine à sous
 
@@ -451,7 +451,7 @@ class Casino(commands.GroupCog, group_name="casino", description="Mini-jeux d'ar
     @app_commands.command(name="roulette")
     @app_commands.rename(bet="mise", bet_value="valeur")
     @app_commands.autocomplete(bet_value=bet_value_autocomplete)
-    @command_cooldown(120, cooldown_name="Roulette")
+    @command_cooldown(120, cooldown_name="roulette")
     async def cmd_roulette(self, interaction: discord.Interaction, bet: app_commands.Range[int, 20, 200], bet_value: str):
         """Jouer à la roulette européenne
         

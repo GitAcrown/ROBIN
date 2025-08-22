@@ -9,7 +9,7 @@ from discord.ext import commands
 
 from common import dataio
 from common.economy import EconomyDBManager, BankAccount, Operation, MONEY_SYMBOL
-from common.cooldowns import command_cooldown
+from common.cooldowns import check_cooldown_state, set_cooldown, get_remaining_time
 
 logger = logging.getLogger(f'ROBIN.{__name__.split(".")[-1]}')
 
@@ -22,6 +22,31 @@ ICONS = {
     'hacker': '<:hacking:1408485940485292103>'
 }
 
+COOLDOWNS = {
+    'cooking': 3600 * 1,      # 1h - Gains moyens/élevés
+    'delivery': 3600 * 0.75,  # 45h - Gains moyens
+    'pickpocket': 3600 * 0.5, # 30min - Gains faibles
+    'hacker': 3600 * 1        # 1h - Gains élevés mais difficile
+}
+
+# Fonctions utilitaires ==========================================
+
+def format_next_work_time(user):
+    """Formate le temps jusqu'au prochain travail disponible."""
+    remaining = get_remaining_time(user, 'travail')
+    if remaining <= 0:
+        return "-# Vous pouvez travailler maintenant !"
+    
+    hours, remainder = divmod(int(remaining), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    if hours > 0:
+        return f"-# Prochain travail dans **{hours}h {minutes}min {seconds}s**"
+    elif minutes > 0:
+        return f"-# Prochain travail dans **{minutes}min {seconds}s**"
+    else:
+        return f"-# Prochain travail dans **{seconds}s**"
+
 # Jobs ==========================================
 
 # Livreur ---------------------------
@@ -29,95 +54,97 @@ DELIVERY_EVENTS = [
     {
         "text": "`🚴‍♂️` Livraison sans problème, le client est satisfait !",
         "label": "Classique",
+        "tip_range": (12, 20)
+    },
+    {
+        "text": "`⛈️` Il pleut, mais vous arrivez à l'heure !",
+        "label": "Pluie",
         "tip_range": (15, 25)
     },
     {
-        "text": "`🌧️` Il pleut, mais vous livrez quand même à temps !",
-        "label": "Sous la pluie",
-        "tip_range": (20, 35)
+        "text": "`🚧` Vous évitez les travaux en prenant un raccourci !",
+        "label": "Détour",
+        "tip_range": (15, 22)
     },
     {
-        "text": "`🚗` Vous évitez de justesse un embouteillage !",
-        "label": "Embouteillages",
+        "text": "`📞` Le client vous appelle pour changer l'adresse !",
+        "label": "Changement",
         "tip_range": (20, 30)
-    },
-    {
-        "text": "`🍕` Le client vous donne un pourboire généreux !",
-        "label": "Pourboire généreux",
-        "tip_range": (30, 45)
     },
     {
         "text": "`🐕` Un chien vous poursuit, mais vous réussissez à fuir !",
         "label": "Chien en colère",
-        "tip_range": (15, 30)
+        "tip_range": (10, 20)
     },
     {
         "text": "`📱` Vous trouvez la bonne adresse du premier coup !",
         "label": "Adresse trouvée",
-        "tip_range": (15, 25)
+        "tip_range": (12, 18)
     },
     {
         "text": "`🚲` Votre vélo a un petit problème, mais vous réparez rapidement !",
         "label": "Réparation rapide",
-        "tip_range": (10, 25)
+        "tip_range": (8, 18)
     },
     {
         "text": "`🌟` Le client vous félicite pour votre rapidité !",
         "label": "Client satisfait",
-        "tip_range": (30, 40)
+        "tip_range": (22, 28)
     },
     {
         "text": "`🚦` Tous les feux sont verts sur votre trajet !",
         "label": "Feux verts",
-        "tip_range": (20, 35)
+        "tip_range": (15, 25)
     },
     {
         "text": "`📦` Vous livrez plusieurs commandes en une tournée !",
         "label": "Livraison multiple",
-        "tip_range": (35, 50)
+        "tip_range": (25, 35)
     },
-    {   "text": "`🚧` Pécresse avait prévu des travaux sur votre chemin, mais vous passez à travers !",
+    {
+        "text": "`🚧` Pécresse avait prévu des travaux sur votre chemin, mais vous passez à travers !",
         "label": "Chantier",
-        "tip_range": (10, 25)}
+        "tip_range": (8, 18)
+    }
 ]
 
 # Pickpocket ---------------------------
 PICKPOCKET_EVENTS = [
     {
         "text": "`🎯` Vous volez discrètement dans la poche d'un passant !",
-        "amount_range": (9, 18)
+        "amount_range": (5, 12)
     },
     {
         "text": "`👥` Vous bousculez quelqu'un 'accidentellement' et récupérez de la monnaie !",
-        "amount_range": (7, 17)
+        "amount_range": (4, 10)
     },
     {
         "text": "`💼` Vous trouvez un portefeuille par terre avec un peu d'argent dedans !",
-        "amount_range": (7, 17)
+        "amount_range": (4, 10)
     },
     {
         "text": "`🎪` Vous profitez de la distraction d'un spectacle de rue pour voler !",
-        "amount_range": (7, 12)
+        "amount_range": (4, 8)
     },
     {
         "text": "`☂️` Sous prétexte d'aider quelqu'un avec son parapluie, vous lui prenez des pièces !",
-        "amount_range": (6, 9)
+        "amount_range": (3, 6)
     },
     {
         "text": "`🏃‍♂️` Vous faites du jogging et 'accidentellement' heurtez quelqu'un !",
-        "amount_range": (9, 18)
+        "amount_range": (5, 12)
     },
     {
         "text": "`📱` Pendant que quelqu'un regarde son téléphone, vous lui prenez sa monnaie !",
-        "amount_range": (3, 10)
+        "amount_range": (2, 7)
     }
 ]
 
 # Hacker ---------------------------
 HACKER_REWARDS = {
-    "facile": (25, 40),
-    "moyen": (40, 65),
-    "difficile": (60, 85)
+    "facile": (18, 28),
+    "moyen": (28, 45),
+    "difficile": (42, 60)
 }
 
 HACKER_SEQUENCES = [
@@ -219,6 +246,11 @@ COMPAT_PLATS = {
         "idéal": ["sucre", "chocolat", "fruits"],
         "alternatif": ["confiture", "crème chantilly", "noisettes"],
         "risqué": ["fromage", "thon", "tomate"]
+    },
+    "Crêpe salée": {
+        "idéal": ["jambon", "fromage", "œuf"],
+        "alternatif": ["champignons", "épinards", "poulet"],
+        "risqué": ["chocolat", "banane", "fraise"]
     }
 }
 
@@ -276,7 +308,7 @@ class CookGameView(ui.LayoutView):
         
     def calculate_tip(self, ingredient_category: str) -> int:
         """Calcule le tip basé sur la catégorie d'ingrédient choisi."""
-        base_tip = 30
+        base_tip = 22
         
         if ingredient_category == "idéal":
             # 70% chance pour le tip maximum, 25% pour moyen, 5% pour minimum
@@ -319,6 +351,12 @@ class CookGameView(ui.LayoutView):
         # Informations sur les gains
         earnings_text = ui.TextDisplay(f"**Pourboire gagné** · *+{tip}{MONEY_SYMBOL}*\n**Nouveau solde** · ***{self.account.balance}{MONEY_SYMBOL}***")
         container.add_item(earnings_text)
+        
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        container.add_item(next_work_text)
 
         self.add_item(container)
         
@@ -413,6 +451,12 @@ class DeliveryGameView(ui.LayoutView):
         # Gains
         earnings_text = ui.TextDisplay(f"**Gains** · *+{self.tip}{MONEY_SYMBOL}*\n**Nouveau solde** · ***{self.account.balance}{MONEY_SYMBOL}***")
         container.add_item(earnings_text)
+        
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        container.add_item(next_work_text)
         
         self.add_item(container)
         
@@ -511,6 +555,12 @@ class PickpocketGameView(ui.LayoutView):
         result_text = ui.TextDisplay(f"**Cible** · *{self.target.mention}*\n**Montant volé** · *+{self.amount}{MONEY_SYMBOL}*\n**Nouveau solde** · ***{self.account.balance}{MONEY_SYMBOL}***")
         container.add_item(result_text)
         
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        container.add_item(next_work_text)
+        
         self.add_item(container)
         await interaction.response.edit_message(view=self, allowed_mentions=discord.AllowedMentions.none())
     
@@ -529,6 +579,12 @@ class PickpocketGameView(ui.LayoutView):
         result_text = ui.TextDisplay(f"**Cible** · *{self.target.mention}*\n**Montant volé** · *+{stolen}{MONEY_SYMBOL}*\n**Nouveau solde** · ***{self.account.balance}{MONEY_SYMBOL}***")
         container.add_item(result_text)
         
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        container.add_item(next_work_text)
+        
         self.add_item(container)
         await interaction.response.edit_message(view=self, allowed_mentions=discord.AllowedMentions.none())
     
@@ -546,6 +602,12 @@ class PickpocketGameView(ui.LayoutView):
         
         result_text = ui.TextDisplay(f"**Cible** · *{self.target.mention}*\n**Résultat** · *Aucun gain*")
         container.add_item(result_text)
+        
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        container.add_item(next_work_text)
         
         self.add_item(container)
         await interaction.response.edit_message(view=self, allowed_mentions=discord.AllowedMentions.none())
@@ -651,6 +713,12 @@ class HackerGameView(ui.LayoutView):
                 f"**Nouveau solde** · ***{self.account.balance}{MONEY_SYMBOL}***"
             )
             container.add_item(success_reward)
+            
+            container.add_item(ui.Separator())
+            
+            # Temps jusqu'au prochain travail
+            next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+            container.add_item(next_work_text)
         else:
             # Échec
             failure_text = ui.TextDisplay("**Mot de passe incorrect !** Tentative échouée.")
@@ -663,6 +731,12 @@ class HackerGameView(ui.LayoutView):
                 f"**Aucune récompense**"
             )
             container.add_item(failure_info)
+            
+            container.add_item(ui.Separator())
+            
+            # Temps jusqu'au prochain travail
+            next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+            container.add_item(next_work_text)
         
         self.add_item(container)
         await interaction.response.edit_message(view=self)
@@ -724,7 +798,7 @@ class Jobs(commands.Cog):
             app_commands.Choice(name="Pickpocket (Vol)", value="pickpocket"),
             app_commands.Choice(name="Hacker (Déchiffrage)", value="hacker")
         ])
-    @command_cooldown(10800, cooldown_name="Travail")  # Cooldown de 3 heures
+    @check_cooldown_state('travail', active=False)
     async def cmd_job(self, interaction: discord.Interaction, work_type: str):
         """Effectuer une tâche pour gagner de l'argent
         
@@ -734,6 +808,7 @@ class Jobs(commands.Cog):
             account = self.eco.get_account(interaction.user)
             view = DeliveryGameView(account, interaction.user)
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            set_cooldown(interaction.user, 'travail', COOLDOWNS['delivery'])
             
         elif work_type.lower() == "cuisinier":
             account = self.eco.get_account(interaction.user)
@@ -751,8 +826,8 @@ class Jobs(commands.Cog):
             
             # Créer la vue du mini-jeu
             view = CookGameView(account, plat, ingredients, interaction.user)
-            
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            set_cooldown(interaction.user, 'travail', COOLDOWNS['cooking'])
             
         elif work_type.lower() == "pickpocket":
             account = self.eco.get_account(interaction.user)
@@ -762,16 +837,16 @@ class Jobs(commands.Cog):
             
             # Créer la vue du mini-jeu
             view = PickpocketGameView(account, guild_members, interaction.user)
-            
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            set_cooldown(interaction.user, 'travail', COOLDOWNS['pickpocket'])
             
         elif work_type.lower() == "hacker":
             account = self.eco.get_account(interaction.user)
             
             # Créer la vue du mini-jeu de hacking
             view = HackerGameView(account, interaction.user)
-            
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            set_cooldown(interaction.user, 'travail', COOLDOWNS['hacker'])
             
         else:
             await interaction.response.send_message(

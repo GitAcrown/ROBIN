@@ -10,7 +10,7 @@ import discord
 from discord import app_commands, ui
 from discord.ext import commands
 
-from common.cooldowns import get_all_cooldowns, Cooldown
+from common.cooldowns import get_all_cooldowns, reset_cooldowns, Cooldown
 
 logger = logging.getLogger(f'ROBIN.{__name__.split(".")[-1]}')
 
@@ -61,7 +61,7 @@ class CooldownsView(ui.LayoutView):
                     expires_timestamp = int(cooldown.expires_at)
                     
                     # Titre avec nom du cooldown
-                    cd_title = ui.TextDisplay(f"### {cooldown.cooldown_name}")
+                    cd_title = ui.TextDisplay(f"### {cooldown.cooldown_name.capitalize()}")
                     container.add_item(cd_title)
                     
                     # Informations détaillées avec expiration d'abord et progression à côté
@@ -246,6 +246,13 @@ class Core(commands.Cog):
             view=view,
             allowed_mentions=discord.AllowedMentions.none()
         )
+        
+    @commands.command(name="resetcd", hidden=True)
+    @commands.is_owner()
+    async def reset_cooldowns(self, ctx: commands.Context):
+        """Réinitialise tous les cooldowns du bot (commande propriétaire)"""
+        count = reset_cooldowns()
+        await ctx.send(f"**`SUCCÈS`** · Réinitialisé {count} cooldowns.")
         
         
 async def setup(bot):
