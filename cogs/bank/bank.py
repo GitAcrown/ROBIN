@@ -458,8 +458,9 @@ class Bank(commands.Cog):
         
     # ADMINISTRATION ---------------------------------
     
-    @app_commands.command(name='adjust')
-    @app_commands.checks.has_permissions(administrator=True)
+    admin_group = app_commands.Group(name='admin', description="Commandes d'administration de la banque.", default_permissions=discord.Permissions(administrator=True))
+    
+    @admin_group.command(name='adjust')
     @app_commands.rename(user='utilisateur', amount='montant', reason='raison')
     async def cmd_adjust(self, interaction: discord.Interaction, user: discord.User, amount: int, reason: Optional[app_commands.Range[str, 1, 32]] = None):
         """Ajoute ou retire de l'argent à un utilisateur.
@@ -485,6 +486,48 @@ class Bank(commands.Cog):
         )
         # Log l'opération
         logger.info(f"i --- {interaction.user.name} a modifié le compte de {user.name}: {amount}{MONEY_SYMBOL} ({reason or 'Aucune raison'})")
+        
+    @admin_group.command(name='rollback')
+    @app_commands.rename(user='utilisateur', operation_id='opération')
+    async def cmd_rollback(self, interaction: discord.Interaction, user: discord.User, operation_id: str):
+        """Annule toutes les opérations jusqu'à une opération spécifique
+        
+        :param user: Utilisateur dont annuler les opérations
+        :param operation_id: ID de l'opération jusqu'à laquelle annuler (incluse)
+        """
+        account = self.eco.get_account(user)
+        if not account:
+            return await interaction.response.send_message(f"Aucun compte trouvé pour {user.name}.", ephemeral=True)
+        
+        opes = account.rollback(operation_id)
+        if not opes:
+            return await interaction.response.send_message(f"Aucune opération trouvée avec l'ID `{operation_id}` pour {user.name}.", ephemeral=True)
+        
+        await interaction.response.send_message(
+            f"**ANNULATION EFFECTUÉE** · {len(opes)} opérations annulées pour {user.mention}.\n**Nouveau solde** · *{account.balance}{MONEY_SYMBOL}*",
+            allowed_mentions=discord.AllowedMentions(users=[user])
+        )
+        
+        # Log l'opération
+        logger.info(f"i --- {interaction.user.name} a annulé {len(opes)} opérations du compte de {user.name} jusqu'à l'opération #{operation_id}")
+        
+    @cmd_rollback.autocomplete('operation_id')
+    async def autocomplete_operation_id(self, interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
+        """Fournit des suggestions pour l'autocomplétion de l'ID d'opération."""
+        user = interaction.namespace.user
+        if not user:
+            return []
+        
+        account = self.eco.get_account(user)
+        if not account:
+            return []
+        
+        operations = account.get_recent_operations(limit=20)
+        choices = [
+            app_commands.Choice(name=f"#{op.id} ({op.delta:+d}{MONEY_SYMBOL})", value=str(op.id))
+            for op in operations if current in str(op.id)
+        ]
+        return choices[:20]
         
 async def setup(bot):
     await bot.add_cog(Bank(bot))

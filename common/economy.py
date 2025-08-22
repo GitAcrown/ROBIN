@@ -255,6 +255,36 @@ class BankAccount:
             raise InsufficientFundsError("Le solde ne peut pas devenir négatif après l'annulation.")
         return self.__register_operation(new_balance, f"Annulation de l'opération {operation.id}")
     
+    def rollback(self, target_operation: Union['Operation', str]) -> Iterable['Operation']:
+        """Annule toutes les opérations jusqu'à une opération cible (incluse)."""
+        if isinstance(target_operation, str):
+            operation_id = target_operation
+            target_operation = self.db_manager.get_operation_by_id(operation_id)
+        elif not isinstance(target_operation, Operation):
+            raise TypeError("L'opération doit être une instance de Operation ou un ID d'opération.")
+        if target_operation.user_id != self.user.id:
+            raise AccountError("L'opération ne correspond pas à ce compte.")
+        
+        operations = self.db_manager.get_operations(
+            func=lambda op: op.user_id == self.user.id
+        )
+        
+        to_rollback = []
+        for op in operations:
+            to_rollback.append(op)
+            if op.id == target_operation.id:
+                break
+        else:
+            raise OperationError("L'opération cible n'a pas été trouvée dans l'historique.")
+        
+        rolled_back_ops = []
+        for op in to_rollback:
+            rolled_back_op = self.reverse(op)
+            if rolled_back_op:
+                rolled_back_ops.append(rolled_back_op)
+        
+        return rolled_back_ops
+    
     # Transactions -----------------------------
     
     def get_recent_operations(self, limit: int = 5) -> Iterable['Operation']:
