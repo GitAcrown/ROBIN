@@ -114,11 +114,6 @@ class CooldownsView(ui.LayoutView):
             footer_text = f"*Affichage de 15 cooldowns sur {len(self.cooldowns)} au total*"
             footer = ui.TextDisplay(footer_text)
             container.add_item(footer)
-        elif len(self.cooldowns) > 0:
-            container.add_item(ui.Separator())
-            footer_text = f"*Total de {len(self.cooldowns)} cooldown{'s' if len(self.cooldowns) > 1 else ''}*"
-            footer = ui.TextDisplay(footer_text)
-            container.add_item(footer)
         
         self.add_item(container)
 
