@@ -47,10 +47,8 @@ class CooldownsView(ui.LayoutView):
         header = ui.TextDisplay(f"## {ICONS['cooldown']} Cooldowns actifs · {self.user.mention}")
         container.add_item(header)
         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.large))
-        
-        # Limiter à 35 cooldowns maximum pour éviter la limite de 40 children
-        # (header + separator + footer = 3, reste 37 places)
-        displayed_cooldowns = self.cooldowns[:35]
+    
+        displayed_cooldowns = self.cooldowns[:15]
         
         if not displayed_cooldowns:
             no_cooldowns = ui.TextDisplay("Aucun cooldown actif.")
@@ -111,9 +109,9 @@ class CooldownsView(ui.LayoutView):
                         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.small))
         
         # Footer avec nombre total
-        if len(self.cooldowns) > 35:
+        if len(self.cooldowns) > 15:
             container.add_item(ui.Separator())
-            footer_text = f"*Affichage de 35 cooldowns sur {len(self.cooldowns)} au total*"
+            footer_text = f"*Affichage de 15 cooldowns sur {len(self.cooldowns)} au total*"
             footer = ui.TextDisplay(footer_text)
             container.add_item(footer)
         elif len(self.cooldowns) > 0:
