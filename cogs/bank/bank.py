@@ -209,7 +209,7 @@ class RankingView(ui.LayoutView):
 
 class OperationHistoryView(ui.LayoutView):
     def __init__(self, account: BankAccount, user: discord.User):
-        super().__init__(timeout=300)
+        super().__init__(timeout=120)
         self.account = account
         self.user = user
         
@@ -291,8 +291,39 @@ class OperationHistoryView(ui.LayoutView):
             navigation = NavigationButtons()
             self.add_item(navigation)
             navigation.update_buttons()
+        
+        # Si la vue est expirée, désactiver tous les boutons
+        if self.is_finished():
+            for item in self.children:
+                if hasattr(item, 'children'):  # ActionRow
+                    for child in item.children:
+                        if isinstance(child, ui.Button):
+                            child.disabled = True
     
     def update_display(self):
+        """Met à jour l'affichage sans recréer complètement la vue."""
+        # Sauvegarder l'état d'expiration actuel
+        current_timeout = self.timeout
+        is_finished = self.is_finished()
+        
+        self.build_interface()
+        
+        # Restaurer l'état d'expiration
+        if is_finished:
+            self.stop()
+        else:
+            self.timeout = current_timeout
+    
+    async def on_timeout(self) -> None:
+        """Appelé quand la vue expire."""
+        # Désactiver tous les boutons
+        for item in self.children:
+            if hasattr(item, 'children'):  # ActionRow
+                for child in item.children:
+                    if isinstance(child, ui.Button):
+                        child.disabled = True
+        
+        # Mettre à jour l'affichage pour refléter l'expiration
         self.build_interface()
 
 
@@ -513,24 +544,6 @@ class Bank(commands.Cog):
         
         # Log l'opération
         logger.info(f"i --- {interaction.user.name} a annulé {len(opes)} opérations du compte de {user.name} jusqu'à l'opération #{operation_id}")
-        
-    @cmd_rollback.autocomplete('operation_id')
-    async def autocomplete_operation_id(self, interaction: discord.Interaction, current: str) -> list[app_commands.Choice[str]]:
-        """Fournit des suggestions pour l'autocomplétion de l'ID d'opération."""
-        user = interaction.namespace['user']
-        if not user:
-            return []
-        
-        account = self.eco.get_account(user)
-        if not account:
-            return []
-        
-        operations = account.get_recent_operations(limit=20)
-        choices = [
-            app_commands.Choice(name=f"#{op.id} ({op.delta:+d}{MONEY_SYMBOL})", value=str(op.id))
-            for op in operations if current in str(op.id)
-        ]
-        return choices[:20]
         
 async def setup(bot):
     await bot.add_cog(Bank(bot))
