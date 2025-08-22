@@ -9,7 +9,7 @@ from discord.ext import commands
 
 from common import dataio
 from common.economy import EconomyDBManager, BankAccount, Operation, MONEY_SYMBOL
-from common.cooldowns import check_cooldown_state, set_cooldown, get_remaining_time
+from common.cooldowns import check_cooldown_state, set_cooldown
 
 logger = logging.getLogger(f'ROBIN.{__name__.split(".")[-1]}')
 
@@ -24,28 +24,20 @@ ICONS = {
 
 COOLDOWNS = {
     'cooking': 3600 * 1,      # 1h - Gains moyens/élevés
-    'delivery': 3600 * 0.75,  # 45h - Gains moyens
+    'delivery': 3600 * 0.75,  # 45m - Gains moyens
     'pickpocket': 3600 * 0.5, # 30min - Gains faibles
     'hacker': 3600 * 1        # 1h - Gains élevés mais difficile
 }
 
 # Fonctions utilitaires ==========================================
 
-def format_next_work_time(user):
-    """Formate le temps jusqu'au prochain travail disponible."""
-    remaining = get_remaining_time(user, 'travail')
-    if remaining <= 0:
-        return "-# Vous pouvez travailler maintenant !"
+def format_next_work_time(work_type: str):
+    """Affiche le temps jusqu'au prochain travail disponible."""
+    cooldown = COOLDOWNS.get(work_type)
+    if not cooldown:
+        return ""
     
-    hours, remainder = divmod(int(remaining), 3600)
-    minutes, seconds = divmod(remainder, 60)
-    
-    if hours > 0:
-        return f"-# Prochain travail dans **{hours}h {minutes}min {seconds}s**"
-    elif minutes > 0:
-        return f"-# Prochain travail dans **{minutes}min {seconds}s**"
-    else:
-        return f"-# Prochain travail dans **{seconds}s**"
+    return f"-# Vous pourrez retravailler dans **{int(cooldown // 60)} minutes**"
 
 # Jobs ==========================================
 
@@ -355,7 +347,7 @@ class CookGameView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Temps jusqu'au prochain travail
-        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        next_work_text = ui.TextDisplay(format_next_work_time('cooking'))
         container.add_item(next_work_text)
 
         self.add_item(container)
@@ -455,7 +447,7 @@ class DeliveryGameView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Temps jusqu'au prochain travail
-        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        next_work_text = ui.TextDisplay(format_next_work_time('delivery'))
         container.add_item(next_work_text)
         
         self.add_item(container)
@@ -558,7 +550,7 @@ class PickpocketGameView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Temps jusqu'au prochain travail
-        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        next_work_text = ui.TextDisplay(format_next_work_time('pickpocket'))
         container.add_item(next_work_text)
         
         self.add_item(container)
@@ -582,7 +574,7 @@ class PickpocketGameView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Temps jusqu'au prochain travail
-        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        next_work_text = ui.TextDisplay(format_next_work_time('pickpocket'))
         container.add_item(next_work_text)
         
         self.add_item(container)
@@ -606,7 +598,7 @@ class PickpocketGameView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Temps jusqu'au prochain travail
-        next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+        next_work_text = ui.TextDisplay(format_next_work_time('pickpocket'))
         container.add_item(next_work_text)
         
         self.add_item(container)
@@ -717,7 +709,7 @@ class HackerGameView(ui.LayoutView):
             container.add_item(ui.Separator())
             
             # Temps jusqu'au prochain travail
-            next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+            next_work_text = ui.TextDisplay(format_next_work_time('hacker'))
             container.add_item(next_work_text)
         else:
             # Échec
@@ -735,7 +727,7 @@ class HackerGameView(ui.LayoutView):
             container.add_item(ui.Separator())
             
             # Temps jusqu'au prochain travail
-            next_work_text = ui.TextDisplay(format_next_work_time(self.user))
+            next_work_text = ui.TextDisplay(format_next_work_time('hacker'))
             container.add_item(next_work_text)
         
         self.add_item(container)
