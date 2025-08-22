@@ -58,12 +58,14 @@ class CooldownsView(ui.LayoutView):
                 try:
                     # Calculer les temps
                     progress_percent = cooldown.progress() * 100
+                    expires_timestamp = int(cooldown.expires_at)
                     
                     # Titre avec nom du cooldown
                     cd_title = ui.TextDisplay(f"### {cooldown.cooldown_name}")
+                    container.add_item(cd_title)
                     
-                    # Informations détaillées (sans le temps restant puisqu'il est dans le bouton)
-                    info_text = f"**Progression** · {progress_percent:.1f}%"
+                    # Informations détaillées avec expiration d'abord et progression à côté
+                    info_text = f"**Expiration** · <t:{expires_timestamp}:R> ({progress_percent:.1f}%)"
                     
                     # Ajouter les métadonnées si disponibles
                     if cooldown.metadata:
@@ -74,35 +76,19 @@ class CooldownsView(ui.LayoutView):
                     info_text += f"\n-# Lancée le {created_time}"
                     
                     cd_info = ui.TextDisplay(info_text)
-                    
-                    # Bouton avec temps restant formaté (désactivé)
-                    time_button = ui.Button(
-                        label=cooldown.format_remaining_time(), 
-                        style=discord.ButtonStyle.secondary, 
-                        disabled=True
-                    )
-                    
-                    # Créer la section
-                    cd_section = ui.Section(cd_title, cd_info, accessory=time_button)
-                    container.add_item(cd_section)
+                    container.add_item(cd_info)
                     
                     # Ajouter un séparateur entre les cooldowns (sauf pour le dernier)
                     if i < len(displayed_cooldowns) - 1:
                         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.small))
                         
                 except Exception:
-                    # En cas d'erreur, section simple avec bouton d'erreur
-                    error_button = ui.Button(
-                        label="Erreur", 
-                        style=discord.ButtonStyle.danger, 
-                        disabled=True
-                    )
-                    error_section = ui.Section(
-                        ui.TextDisplay("### Erreur de lecture"),
-                        ui.TextDisplay("Impossible de lire ce cooldown"),
-                        accessory=error_button
-                    )
-                    container.add_item(error_section)
+                    # En cas d'erreur, affichage simple
+                    error_title = ui.TextDisplay("### Erreur de lecture")
+                    container.add_item(error_title)
+                    
+                    error_info = ui.TextDisplay("Impossible de lire ce cooldown")
+                    container.add_item(error_info)
                     
                     # Séparateur après erreur aussi
                     if i < len(displayed_cooldowns) - 1:
