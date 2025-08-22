@@ -212,6 +212,7 @@ class OperationHistoryView(ui.LayoutView):
         super().__init__(timeout=120)
         self.account = account
         self.user = user
+        self.message = None  # Pour stocker la référence au message
         
         operations = account.get_recent_operations(limit=200)
         self.pages = [operations[i:i + 5] for i in range(0, len(operations), 5)]
@@ -236,7 +237,11 @@ class OperationHistoryView(ui.LayoutView):
         
         container = ui.Container()
         
-        header = ui.TextDisplay(f"## {ICONS['robin']} Historique des opérations · {self.account.user.mention}")
+        # En-tête avec indicateur d'expiration si nécessaire
+        if self.is_finished():
+            header = ui.TextDisplay(f"## {ICONS['robin']} Historique des opérations · {self.account.user.mention} *(Expiré)*")
+        else:
+            header = ui.TextDisplay(f"## {ICONS['robin']} Historique des opérations · {self.account.user.mention}")
         container.add_item(header)
         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.large))
         
@@ -323,8 +328,15 @@ class OperationHistoryView(ui.LayoutView):
                     if isinstance(child, ui.Button):
                         child.disabled = True
         
-        # Mettre à jour l'affichage pour refléter l'expiration
+        # Reconstruire l'interface avec les boutons désactivés
         self.build_interface()
+        
+        # Mettre à jour le message Discord si possible
+        if self.message:
+            try:
+                await self.message.edit(view=self)
+            except discord.HTTPException:
+                pass  # Le message n'existe plus ou autre erreur
 
 
 class TransfertView(ui.LayoutView):
@@ -431,6 +443,9 @@ class Bank(commands.Cog):
             view=view,
             allowed_mentions=discord.AllowedMentions.none()
         )
+        
+        # Stocker la référence au message pour pouvoir le modifier lors de l'expiration
+        view.message = await interaction.original_response()
         
     @app_commands.command(name='ranking')
     @app_commands.guild_only()
