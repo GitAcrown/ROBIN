@@ -172,7 +172,7 @@ HACKER_SEQUENCES = [
     {"code": "CYBERSECURITY", "hint": "[Informatique] Sécurité informatique (EN)", "hint2": "Protection des systèmes contre cyberattaques", "reward": 68},
     {"code": "PENETRATION", "hint": "[Informatique] Test d'intrusion", "hint2": "Test de sécurité par simulation d'attaque", "reward": 60},
     {"code": "VULNERABILITY", "hint": "[Informatique] Faille de sécurité (EN)", "hint2": "Faiblesse exploitable dans un système", "reward": 65},
-    {"code": "AUTHENTICATION", "hint": "[Informatique] Processus de vérification (EN)", "hint2": "Terme lié à la sécurité des accès", "reward": 70},
+    {"code": "AUTHENTICATION", "hint": "[Informatique] Processus de vérification des accès (EN)", "hint2": "Utilisé afin d'identifier l'auteur d'une requête", "reward": 70},
     {"code": "OBFUSCATION", "hint": "[Informatique] Technique de masquage (EN)", "hint2": "Rendre le code illisible pour le protéger", "reward": 58},
     {"code": "STEGANOGRAPHIE", "hint": "[Informatique] Art de cacher des données", "hint2": "Dissimuler un message dans une image/fichier", "reward": 72},
     {"code": "BOTNET", "hint": "[Informatique] Réseau de machines infectées (EN)", "hint2": "Réseau de robots zombies contrôlés", "reward": 45},
@@ -857,7 +857,7 @@ class HackerGameView(ui.LayoutView):
                 reward_text = f"**Récompense** · ~~*{original_reward}{MONEY_SYMBOL}*~~ *{new_reward}{MONEY_SYMBOL}*"
                 
                 # Afficher les deux indices
-                hint_text = f"**Indice** · *{self.sequence_data['hint']}*\n*{self.sequence_data['hint2']}*"
+                hint_text = f"**Indice** · *{self.sequence_data['hint']}* | *{self.sequence_data['hint2']}*"
                 
                 second_chance_info = ui.TextDisplay(f"{reward_text}\n{hint_text}")
                 container.add_item(second_chance_info)
