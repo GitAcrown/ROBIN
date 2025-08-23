@@ -1,5 +1,6 @@
 import logging
 import random
+import unicodedata
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
@@ -30,6 +31,15 @@ COOLDOWNS = {
 }
 
 # Fonctions utilitaires ==========================================
+
+def normalize_string(text: str) -> str:
+    """Retire les accents et caractères spéciaux d'une chaîne."""
+    # Convertir en majuscules
+    text = text.upper().strip()
+    # Retirer les accents
+    text = unicodedata.normalize('NFD', text)
+    text = ''.join(char for char in text if unicodedata.category(char) != 'Mn')
+    return text
 
 def format_next_work_time(work_type: str):
     """Affiche le temps jusqu'au prochain travail disponible."""
@@ -133,52 +143,42 @@ PICKPOCKET_EVENTS = [
 ]
 
 # Hacker ---------------------------
-HACKER_REWARDS = {
-    "facile": (18, 28),
-    "moyen": (28, 45),
-    "difficile": (42, 60)
-}
-
 HACKER_SEQUENCES = [
-    # Facile (12 scénarios)
-    {"code": "A1B2C3", "hint": "[Logique] Alternance lettres/chiffres", "difficulty": "facile"},
-    {"code": "XYZABC", "hint": "[Logique] Fin + début de l'alphabet", "difficulty": "facile"},
-    {"code": "147258369", "hint": "[Tech] Colonnes du pavé numérique", "difficulty": "facile"},
-    {"code": "QWERTY", "hint": "[Tech] Disposition clavier la plus courante", "difficulty": "facile"},
-    {"code": "123ABC", "hint": "[Logique] Chiffres puis lettres", "difficulty": "facile"},
-    {"code": "AZERTY", "hint": "[Tech] Disposition clavier française", "difficulty": "facile"},
-    {"code": "PASSWORD", "hint": "[Tech] Le mot de passe le plus courant", "difficulty": "facile"},
-    {"code": "ADMIN", "hint": "[Tech] Compte administrateur par défaut", "difficulty": "facile"},
-    {"code": "PIZZA", "hint": "[Nourriture] Plat italien rond et garni", "difficulty": "facile"},
-    {"code": "CHIEN", "hint": "[Animal] Meilleur ami de l'homme", "difficulty": "facile"},
-    {"code": "ROUGE", "hint": "[Couleur] Couleur du sang", "difficulty": "facile"},
-    {"code": "LUNDI", "hint": "[Temps] Premier jour de la semaine", "difficulty": "facile"},
+    # Culture générale
+    {"code": "BAGUETTE", "hint": "[France] Pain traditionnel français", "reward": 28},
+    {"code": "MINECRAFT", "hint": "[Jeu vidéo] Jeu de construction en blocs", "reward": 30},
+    {"code": "NAPOLEON", "hint": "[Histoire] Empereur français célèbre", "reward": 32},
+    {"code": "CROISSANT", "hint": "[Nourriture] Viennoiserie française", "reward": 30},
+    {"code": "POKEMON", "hint": "[Culture pop] Attrapez-les tous !", "reward": 28},
+    {"code": "DRACAUFEU", "hint": "[Jeu vidéo] Dragon de type feu et vol", "reward": 35},
+    {"code": "NUTELLA", "hint": "[Marque] Pâte à tartiner", "reward": 26},
+    {"code": "RICKROLL", "hint": "[Internet] Piège musical célèbre (EN)", "reward": 38},
     
-    # Moyen (12 scénarios)
-    {"code": "FIREWALL", "hint": "[Informatique] Protection informatique", "difficulty": "moyen"},
-    {"code": "BACKDOOR", "hint": "[Informatique] Accès secret", "difficulty": "moyen"},
-    {"code": "MALWARE", "hint": "[Informatique] Logiciel malveillant", "difficulty": "moyen"},
-    {"code": "PHISHING", "hint": "[Informatique] Hameçonnage par email", "difficulty": "moyen"},
-    {"code": "BAGUETTE", "hint": "[France] Pain traditionnel français", "difficulty": "moyen"},
-    {"code": "MINECRAFT", "hint": "[Jeu vidéo] Jeu de construction en blocs", "difficulty": "moyen"},
-    {"code": "NAPOLEON", "hint": "[Histoire] Empereur français célèbre", "difficulty": "moyen"},
-    {"code": "CROISSANT", "hint": "[Nourriture] Viennoiserie française", "difficulty": "moyen"},
-    {"code": "POKEMON", "hint": "[Culture pop] Attrapez-les tous !", "difficulty": "moyen"},
-    {"code": "DRACAUFEU", "hint": "[Jeu vidéo] Dragon de type feu et vol", "difficulty": "moyen"},
-    {"code": "NUTELLA", "hint": "[Marque] Pâte à tartiner", "difficulty": "moyen"},
-    {"code": "RICKROLL", "hint": "[Internet] Piège musical célèbre", "difficulty": "moyen"},
-    
-    # Difficile (12 scénarios)
-    {"code": "OVERFLOW", "hint": "[Informatique] Dépassement de mémoire", "difficulty": "difficile"},
-    {"code": "KEYLOGGER", "hint": "[Informatique] Surveillant de frappe", "difficulty": "difficile"},
-    {"code": "ROOTKIT", "hint": "[Informatique] Outil d'accès root caché", "difficulty": "difficile"},
-    {"code": "SPYWARE", "hint": "[Informatique] Logiciel espion", "difficulty": "difficile"},
-    {"code": "B64DECODE", "hint": "[Informatique] Encodage classique web", "difficulty": "difficile"},
-    {"code": "SQLINJECTION", "hint": "[Informatique] Attaque de base de données", "difficulty": "difficile"},
-    {"code": "BRUTEFORCE", "hint": "[Informatique] Méthode de cassage par force", "difficulty": "difficile"},
-    {"code": "ZERODAY", "hint": "[Informatique] Faille inédite et inconnue", "difficulty": "difficile"},
-    {"code": "RANSOMWARE", "hint": "[Informatique] Logiciel de rançon", "difficulty": "difficile"},
-    {"code": "CRYPTOCURRENCY", "hint": "[Informatique] Monnaie numérique décentralisée", "difficulty": "difficile"}
+    # Informatique
+    {"code": "FIREWALL", "hint": "[Informatique] Protection informatique (EN)", "reward": 35},
+    {"code": "BACKDOOR", "hint": "[Informatique] Accès secret (EN)", "reward": 38},
+    {"code": "MALWARE", "hint": "[Informatique] Logiciel malveillant (EN)", "reward": 32},
+    {"code": "PHISHING", "hint": "[Informatique] Hameçonnage par email (EN)", "reward": 36},
+    {"code": "OVERFLOW", "hint": "[Informatique] Dépassement de mémoire (EN)", "reward": 42},
+    {"code": "KEYLOGGER", "hint": "[Informatique] Surveillant de frappe (EN)", "reward": 45},
+    {"code": "ROOTKIT", "hint": "[Informatique] Outil d'accès root caché (EN)", "reward": 48},
+    {"code": "SPYWARE", "hint": "[Informatique] Logiciel espion (EN)", "reward": 40},
+    {"code": "B64DECODE", "hint": "[Informatique] Encodage classique web (EN)", "reward": 50},
+    {"code": "SQLINJECTION", "hint": "[Informatique] Attaque de base de données (EN)", "reward": 55},
+    {"code": "BRUTEFORCE", "hint": "[Informatique] Méthode de cassage par force (EN)", "reward": 52},
+    {"code": "ZERODAY", "hint": "[Informatique] Faille inédite et inconnue (EN)", "reward": 58},
+    {"code": "RANSOMWARE", "hint": "[Informatique] Logiciel de rançon (EN)", "reward": 54},
+    {"code": "CRYPTOCURRENCY", "hint": "[Informatique] Monnaie numérique décentralisée (EN)", "reward": 65},
+    {"code": "BLOCKCHAIN", "hint": "[Tech] Technologie de chaîne de blocs (EN)", "reward": 62},
+    {"code": "CYBERSECURITY", "hint": "[Informatique] Sécurité informatique (EN)", "reward": 68},
+    {"code": "PENETRATION", "hint": "[Informatique] Test d'intrusion", "reward": 60},
+    {"code": "VULNERABILITY", "hint": "[Informatique] Faille de sécurité (EN)", "reward": 65},
+    {"code": "AUTHENTICATION", "hint": "[Informatique] Processus de vérification (EN)", "reward": 70},
+    {"code": "OBFUSCATION", "hint": "[Informatique] Technique de masquage (EN)", "reward": 58},
+    {"code": "STEGANOGRAPHIE", "hint": "[Informatique] Art de cacher des données", "reward": 72},
+    {"code": "BOTNET", "hint": "[Informatique] Réseau de machines infectées (EN)", "reward": 45},
+    {"code": "EXPLOIT", "hint": "[Informatique] Faille à exploiter (EN)", "reward": 42},
+    {"code": "PAYLOAD", "hint": "[Informatique] Charge utile malveillante (EN)", "reward": 48}
 ]
 
 # Cuisinier --------------------------- ---------------------------
@@ -649,7 +649,7 @@ class HackerGameView(ui.LayoutView):
         
         # Informations sur la mission
         mission_text = ui.TextDisplay(
-            f"**Difficulté** · {self.sequence_data['difficulty'].title()}\n"
+            f"**Récompense** · *{self.sequence_data['reward']}{MONEY_SYMBOL}*\n"
             f"**Indice** · *{self.sequence_data['hint']}*"
         )
         container.add_item(mission_text)
@@ -672,7 +672,8 @@ class HackerGameView(ui.LayoutView):
     
     async def attempt_hack(self, interaction: discord.Interaction, guess: str):
         """Traite une tentative de piratage."""
-        guess = guess.upper().strip()
+        guess_normalized = normalize_string(guess)
+        code_normalized = normalize_string(self.sequence_data["code"])
         
         # Vider le contenu actuel
         self.clear_items()
@@ -683,7 +684,7 @@ class HackerGameView(ui.LayoutView):
         container.add_item(header)
         container.add_item(ui.Separator())
         
-        if guess == self.sequence_data["code"]:
+        if guess_normalized == code_normalized:
             # Réussite !
             self.solved = True
             
@@ -695,8 +696,8 @@ class HackerGameView(ui.LayoutView):
             container.add_item(code_text)
             
             # Récompense
-            reward = random.randint(HACKER_REWARDS[self.sequence_data["difficulty"]][0], HACKER_REWARDS[self.sequence_data["difficulty"]][1])
-            self.account.deposit(reward, f"Hacking réussi - {self.sequence_data['difficulty']}")
+            reward = self.sequence_data["reward"]
+            self.account.deposit(reward, f"Hacking réussi - {self.sequence_data['code']}")
             
             container.add_item(ui.Separator())
             success_reward = ui.TextDisplay(
