@@ -145,40 +145,39 @@ PICKPOCKET_EVENTS = [
 # Hacker ---------------------------
 HACKER_SEQUENCES = [
     # Culture générale
-    {"code": "BAGUETTE", "hint": "[France] Pain traditionnel français", "reward": 28},
-    {"code": "MINECRAFT", "hint": "[Jeu vidéo] Jeu de construction en blocs", "reward": 30},
-    {"code": "NAPOLEON", "hint": "[Histoire] Empereur français célèbre", "reward": 32},
-    {"code": "CROISSANT", "hint": "[Nourriture] Viennoiserie française", "reward": 30},
-    {"code": "POKEMON", "hint": "[Culture pop] Attrapez-les tous !", "reward": 28},
-    {"code": "DRACAUFEU", "hint": "[Jeu vidéo] Dragon de type feu et vol", "reward": 35},
-    {"code": "NUTELLA", "hint": "[Marque] Pâte à tartiner", "reward": 26},
-    {"code": "RICKROLL", "hint": "[Internet] Piège musical célèbre (EN)", "reward": 38},
+    {"code": "BAGUETTE", "hint": "[France] Pain traditionnel français", "hint2": "Pain allongé typiquement français", "reward": 28},
+    {"code": "MINECRAFT", "hint": "[Jeu vidéo] Jeu de construction en blocs", "hint2": "Jeu avec des cubes", "reward": 30},
+    {"code": "NAPOLEON", "hint": "[Histoire] Empereur français célèbre", "hint2": "Couronné en 1804", "reward": 32},
+    {"code": "CROISSANT", "hint": "[Nourriture] Viennoiserie française", "hint2": "Pâtisserie en forme de lune", "reward": 30},
+    {"code": "POKEMON", "hint": "[Culture pop] Attrapez-les tous !", "hint2": "Pikachu, Bulbizarre, Salamèche et leurs amis", "reward": 28},
+    {"code": "DRACAUFEU", "hint": "[Jeu vidéo] Dragon de type feu et vol", "hint2": "Évolution finale de Salamèche", "reward": 35},
+    {"code": "NUTELLA", "hint": "[Marque] Pâte à tartiner", "hint2": "Vendue par Ferrero", "reward": 26},
+    {"code": "RICKROLL", "hint": "[Internet] Piège musical célèbre (EN)", "hint2": "Chanson de Rick Astley", "reward": 38},
     
     # Informatique
-    {"code": "FIREWALL", "hint": "[Informatique] Protection informatique (EN)", "reward": 35},
-    {"code": "BACKDOOR", "hint": "[Informatique] Accès secret (EN)", "reward": 38},
-    {"code": "MALWARE", "hint": "[Informatique] Logiciel malveillant (EN)", "reward": 32},
-    {"code": "PHISHING", "hint": "[Informatique] Hameçonnage par email (EN)", "reward": 36},
-    {"code": "OVERFLOW", "hint": "[Informatique] Dépassement de mémoire (EN)", "reward": 42},
-    {"code": "KEYLOGGER", "hint": "[Informatique] Surveillant de frappe (EN)", "reward": 45},
-    {"code": "ROOTKIT", "hint": "[Informatique] Outil d'accès root caché (EN)", "reward": 48},
-    {"code": "SPYWARE", "hint": "[Informatique] Logiciel espion (EN)", "reward": 40},
-    {"code": "B64DECODE", "hint": "[Informatique] Encodage classique web (EN)", "reward": 50},
-    {"code": "SQLINJECTION", "hint": "[Informatique] Attaque de base de données (EN)", "reward": 55},
-    {"code": "BRUTEFORCE", "hint": "[Informatique] Méthode de cassage par force (EN)", "reward": 52},
-    {"code": "ZERODAY", "hint": "[Informatique] Faille inédite et inconnue (EN)", "reward": 58},
-    {"code": "RANSOMWARE", "hint": "[Informatique] Logiciel de rançon (EN)", "reward": 54},
-    {"code": "CRYPTOCURRENCY", "hint": "[Informatique] Monnaie numérique décentralisée (EN)", "reward": 65},
-    {"code": "BLOCKCHAIN", "hint": "[Tech] Technologie de chaîne de blocs (EN)", "reward": 62},
-    {"code": "CYBERSECURITY", "hint": "[Informatique] Sécurité informatique (EN)", "reward": 68},
-    {"code": "PENETRATION", "hint": "[Informatique] Test d'intrusion", "reward": 60},
-    {"code": "VULNERABILITY", "hint": "[Informatique] Faille de sécurité (EN)", "reward": 65},
-    {"code": "AUTHENTICATION", "hint": "[Informatique] Processus de vérification (EN)", "reward": 70},
-    {"code": "OBFUSCATION", "hint": "[Informatique] Technique de masquage (EN)", "reward": 58},
-    {"code": "STEGANOGRAPHIE", "hint": "[Informatique] Art de cacher des données", "reward": 72},
-    {"code": "BOTNET", "hint": "[Informatique] Réseau de machines infectées (EN)", "reward": 45},
-    {"code": "EXPLOIT", "hint": "[Informatique] Faille à exploiter (EN)", "reward": 42},
-    {"code": "PAYLOAD", "hint": "[Informatique] Charge utile malveillante (EN)", "reward": 48}
+    {"code": "FIREWALL", "hint": "[Informatique] Protection informatique (EN)", "hint2": "Bloque les connexions indésirables", "reward": 35},
+    {"code": "BACKDOOR", "hint": "[Informatique] Accès secret (EN)", "hint2": "Porte dérobée cachée dans un système", "reward": 38},
+    {"code": "MALWARE", "hint": "[Informatique] Logiciel malveillant (EN)", "hint2": "Terme générique synonyme de virus", "reward": 32},
+    {"code": "PHISHING", "hint": "[Informatique] Hameçonnage par email (EN)", "hint2": "Terminologie inspirée de la pêche", "reward": 36},
+    {"code": "OVERFLOW", "hint": "[Informatique] Dépassement de mémoire (EN)", "hint2": "Terme anglais pour 'débordement'", "reward": 42},
+    {"code": "KEYLOGGER", "hint": "[Informatique] Surveillant de frappe (EN)", "hint2": "Virus enregistrant les touches clavier", "reward": 45},
+    {"code": "ROOTKIT", "hint": "[Informatique] Outil d'accès système caché (EN)", "hint2": "Kit d'outils administrateur cachés", "reward": 48},
+    {"code": "SPYWARE", "hint": "[Informatique] Logiciel espion (EN)", "hint2": "Malware enregistrant l'activité de l'utilisateur", "reward": 40},
+    {"code": "SQLINJECTION", "hint": "[Informatique] Attaque de base de données (EN)", "hint2": "Injection de code SQL malveillant", "reward": 55},
+    {"code": "BRUTEFORCE", "hint": "[Informatique] Méthode de cassage par force (EN)", "hint2": "Attaque qui teste toutes les combinaisons", "reward": 52},
+    {"code": "ZERODAY", "hint": "[Informatique] Faille inédite et inconnue (EN)", "hint2": "Vulnérabilité jour zéro non corrigée", "reward": 58},
+    {"code": "RANSOMWARE", "hint": "[Informatique] Logiciel de rançon (EN)", "hint2": "Malware qui chiffre les fichiers contre rançon", "reward": 54},
+    {"code": "CRYPTOCURRENCY", "hint": "[Informatique] Monnaie numérique décentralisée (EN)", "hint2": "Bitcoin, Ethereum et autres...", "reward": 65},
+    {"code": "BLOCKCHAIN", "hint": "[Tech] Technologie de chaîne de blocs (EN)", "hint2": "Technologie de registre distribué immutable", "reward": 62},
+    {"code": "CYBERSECURITY", "hint": "[Informatique] Sécurité informatique (EN)", "hint2": "Protection des systèmes contre cyberattaques", "reward": 68},
+    {"code": "PENETRATION", "hint": "[Informatique] Test d'intrusion", "hint2": "Test de sécurité par simulation d'attaque", "reward": 60},
+    {"code": "VULNERABILITY", "hint": "[Informatique] Faille de sécurité (EN)", "hint2": "Faiblesse exploitable dans un système", "reward": 65},
+    {"code": "AUTHENTICATION", "hint": "[Informatique] Processus de vérification (EN)", "hint2": "Terme lié à la sécurité des accès", "reward": 70},
+    {"code": "OBFUSCATION", "hint": "[Informatique] Technique de masquage (EN)", "hint2": "Rendre le code illisible pour le protéger", "reward": 58},
+    {"code": "STEGANOGRAPHIE", "hint": "[Informatique] Art de cacher des données", "hint2": "Dissimuler un message dans une image/fichier", "reward": 72},
+    {"code": "BOTNET", "hint": "[Informatique] Réseau de machines infectées (EN)", "hint2": "Réseau de robots zombies contrôlés", "reward": 45},
+    {"code": "EXPLOIT", "hint": "[Informatique] Faille à exploiter (EN)", "hint2": "Code qui exploite une vulnérabilité", "reward": 42},
+    {"code": "PAYLOAD", "hint": "[Informatique] Charge utile malveillante (EN)", "hint2": "Utilisé plus généralement pour du contenu échangé entre systèmes", "reward": 40}
 ]
 
 # Cuisinier --------------------------- ---------------------------
@@ -291,12 +290,39 @@ class CookGameView(ui.LayoutView):
     
     async def on_timeout(self):
         """Appelé quand le timeout est atteint."""
+        # Désactiver tous les boutons
         for item in self.children:
             if hasattr(item, 'children'):
                 for child in item.children:
                     if isinstance(child, IngredientSelection):
                         for button in child.children:
                             button.disabled = True
+        
+        # Afficher un message de timeout
+        self.clear_items()
+        container = ui.Container()
+        
+        header = ui.TextDisplay(f"## {ICONS['cooking']} Temps écoulé !")
+        container.add_item(header)
+        container.add_item(ui.Separator())
+        
+        timeout_text = ui.TextDisplay("*Le temps imparti pour cuisiner est écoulé...*\n**Aucune récompense obtenue**")
+        container.add_item(timeout_text)
+        
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time('cooking'))
+        container.add_item(next_work_text)
+        
+        self.add_item(container)
+        
+        # Mettre à jour le message (si possible)
+        try:
+            if hasattr(self, 'message') and self.message:
+                await self.message.edit(view=self)
+        except discord.HTTPException:
+            pass  # Ignore si on ne peut pas modifier le message
         
     def calculate_tip(self, ingredient_category: str) -> int:
         """Calcule le tip basé sur la catégorie d'ingrédient choisi."""
@@ -422,6 +448,34 @@ class DeliveryGameView(ui.LayoutView):
         
         self.add_item(container)
     
+    async def on_timeout(self):
+        """Appelé quand le timeout est atteint."""
+        self.clear_items()
+        
+        container = ui.Container()
+        
+        header = ui.TextDisplay(f"## {ICONS['delivery']} Temps écoulé !")
+        container.add_item(header)
+        container.add_item(ui.Separator())
+        
+        timeout_text = ui.TextDisplay("*Vous avez pris trop de temps pour commencer la livraison...*\n**Aucune récompense obtenue**")
+        container.add_item(timeout_text)
+        
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time('delivery'))
+        container.add_item(next_work_text)
+        
+        self.add_item(container)
+        
+        # Mettre à jour le message (si possible)
+        try:
+            if hasattr(self, 'message') and self.message:
+                await self.message.edit(view=self)
+        except discord.HTTPException:
+            pass  # Ignore si on ne peut pas modifier le message
+    
     async def show_result(self, interaction: discord.Interaction):
         """Affiche le résultat de la livraison."""
         # Effectuer le dépôt
@@ -501,6 +555,34 @@ class PickpocketGameView(ui.LayoutView):
         container.add_item(instruction_section)
         
         self.add_item(container)
+    
+    async def on_timeout(self):
+        """Appelé quand le timeout est atteint."""
+        self.clear_items()
+        
+        container = ui.Container()
+        
+        header = ui.TextDisplay(f"## {ICONS['pickpocket']} Temps écoulé !")
+        container.add_item(header)
+        container.add_item(ui.Separator())
+        
+        timeout_text = ui.TextDisplay("*Vous avez pris trop de temps pour agir...*\n**Aucune récompense obtenue**")
+        container.add_item(timeout_text)
+        
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time('pickpocket'))
+        container.add_item(next_work_text)
+        
+        self.add_item(container)
+        
+        # Mettre à jour le message (si possible)
+        try:
+            if hasattr(self, 'message') and self.message:
+                await self.message.edit(view=self)
+        except discord.HTTPException:
+            pass  # Ignore si on ne peut pas modifier le message
     
     async def show_result(self, interaction: discord.Interaction):
         """Affiche le résultat du pickpocket."""
@@ -628,6 +710,7 @@ class HackerGameView(ui.LayoutView):
         self.user = user
         self.sequence_data = random.choice(HACKER_SEQUENCES)
         self.solved = False
+        self.second_chance = False  # Indique si on est à la seconde chance
         
         self._setup_layout()
     
@@ -648,10 +731,18 @@ class HackerGameView(ui.LayoutView):
         container.add_item(ui.Separator())
         
         # Informations sur la mission
-        mission_text = ui.TextDisplay(
-            f"**Récompense** · *{self.sequence_data['reward']}{MONEY_SYMBOL}*\n"
-            f"**Indice** · *{self.sequence_data['hint']}*"
-        )
+        current_reward = self.sequence_data['reward'] // 2 if self.second_chance else self.sequence_data['reward']
+        
+        if self.second_chance:
+            # Affichage avec récompense barrée et nouveau montant
+            original_reward = self.sequence_data['reward']
+            reward_text = f"**Récompense** · ~~*{original_reward}{MONEY_SYMBOL}*~~ *{current_reward}{MONEY_SYMBOL}*"
+            hint_text = f"**Indices** · *{self.sequence_data['hint']}* | *{self.sequence_data['hint2']}*"
+        else:
+            reward_text = f"**Récompense** · *{current_reward}{MONEY_SYMBOL}*"
+            hint_text = f"**Indice** · *{self.sequence_data['hint']}*"
+        
+        mission_text = ui.TextDisplay(f"{reward_text}\n{hint_text}")
         container.add_item(mission_text)
         
         # Code à deviner (masqué)
@@ -669,6 +760,42 @@ class HackerGameView(ui.LayoutView):
         container.add_item(button_section)
         
         self.add_item(container)
+    
+    async def on_timeout(self):
+        """Appelé quand le timeout est atteint."""
+        if self.solved:
+            return  # Ne pas modifier si déjà résolu
+            
+        self.clear_items()
+        
+        container = ui.Container()
+        
+        header = ui.TextDisplay(f"## {ICONS['hacker']} Temps écoulé !")
+        container.add_item(header)
+        container.add_item(ui.Separator())
+        
+        timeout_text = ui.TextDisplay("*Le temps imparti pour décrypter le mot de passe est écoulé...*")
+        container.add_item(timeout_text)
+        
+        container.add_item(ui.Separator())
+        
+        result_text = ui.TextDisplay("**Mission échouée !**\n*Le système de sécurité a résisté...*\n**Aucune récompense obtenue**")
+        container.add_item(result_text)
+        
+        container.add_item(ui.Separator())
+        
+        # Temps jusqu'au prochain travail
+        next_work_text = ui.TextDisplay(format_next_work_time('hacker'))
+        container.add_item(next_work_text)
+        
+        self.add_item(container)
+        
+        # Mettre à jour le message (si possible)
+        try:
+            if hasattr(self, 'message') and self.message:
+                await self.message.edit(view=self)
+        except discord.HTTPException:
+            pass  # Ignore si on ne peut pas modifier le message
     
     async def attempt_hack(self, interaction: discord.Interaction, guess: str):
         """Traite une tentative de piratage."""
@@ -695,13 +822,14 @@ class HackerGameView(ui.LayoutView):
             code_text = ui.TextDisplay(f"### Mot de passe décrypté : `{self.sequence_data['code']}` ✅")
             container.add_item(code_text)
             
-            # Récompense
-            reward = self.sequence_data["reward"]
+            # Récompense (divisée par 2 si seconde chance)
+            reward = self.sequence_data["reward"] // 2 if self.second_chance else self.sequence_data["reward"]
             self.account.deposit(reward, f"Hacking réussi - {self.sequence_data['code']}")
             
             container.add_item(ui.Separator())
+            success_text_reward = "Mission accomplie" + (" à la 2ème chance" if self.second_chance else "") + " !"
             success_reward = ui.TextDisplay(
-                f"**Mission accomplie !**\n"
+                f"**{success_text_reward}**\n"
                 f"**Récompense** · *+{reward}{MONEY_SYMBOL}*\n"
                 f"**Nouveau solde** · ***{self.account.balance}{MONEY_SYMBOL}***"
             )
@@ -714,22 +842,62 @@ class HackerGameView(ui.LayoutView):
             container.add_item(next_work_text)
         else:
             # Échec
-            failure_text = ui.TextDisplay("**Mot de passe incorrect !** Tentative échouée.")
-            container.add_item(failure_text)
-            
-            container.add_item(ui.Separator())
-            failure_info = ui.TextDisplay(
-                f"**Piratage échoué !**\n"
-                f"*Le mot de passe n'est pas déchiffré...*\n"
-                f"**Aucune récompense**"
-            )
-            container.add_item(failure_info)
-            
-            container.add_item(ui.Separator())
-            
-            # Temps jusqu'au prochain travail
-            next_work_text = ui.TextDisplay(format_next_work_time('hacker'))
-            container.add_item(next_work_text)
+            if not self.second_chance:
+                # Première tentative échouée, offrir la seconde chance
+                self.second_chance = True
+                
+                failure_text = ui.TextDisplay("**Mot de passe incorrect !** Seconde chance avec un indice supplémentaire !")
+                container.add_item(failure_text)
+                
+                container.add_item(ui.Separator())
+                
+                # Afficher les récompenses (original barré + nouveau)
+                original_reward = self.sequence_data['reward']
+                new_reward = original_reward // 2
+                reward_text = f"**Récompense** · ~~*{original_reward}{MONEY_SYMBOL}*~~ *{new_reward}{MONEY_SYMBOL}*"
+                
+                # Afficher les deux indices
+                hint_text = f"**Indice** · *{self.sequence_data['hint']}*\n*{self.sequence_data['hint2']}*"
+                
+                second_chance_info = ui.TextDisplay(f"{reward_text}\n{hint_text}")
+                container.add_item(second_chance_info)
+                
+                # Code à deviner (toujours masqué)
+                code_length = len(self.sequence_data["code"])
+                masked_code = "▪" * code_length
+                code_text = ui.TextDisplay(f"### Mot de passe à décrypter : `{masked_code}` ({code_length} lettres)")
+                container.add_item(code_text)
+                
+                # Nouveau bouton pour la seconde tentative
+                hack_button = HackAttemptButton()
+                button_section = ui.Section(
+                    ui.TextDisplay("**Dernière chance ! Entrez le mot de passe :**"),
+                    accessory=hack_button
+                )
+                container.add_item(button_section)
+                
+                self.add_item(container)
+                await interaction.response.edit_message(view=self)
+                # Ne pas stopper la vue, permettre une nouvelle tentative
+                return
+            else:
+                # Seconde tentative échouée, échec définitif
+                failure_text = ui.TextDisplay("**Mot de passe encore incorrect !** Échec définitif.")
+                container.add_item(failure_text)
+                
+                container.add_item(ui.Separator())
+                failure_info = ui.TextDisplay(
+                    f"**Piratage échoué !**\n"
+                    f"*Le système de sécurité a résisté à vos tentatives...*\n"
+                    f"**Aucune récompense**"
+                )
+                container.add_item(failure_info)
+                
+                container.add_item(ui.Separator())
+                
+                # Temps jusqu'au prochain travail
+                next_work_text = ui.TextDisplay(format_next_work_time('hacker'))
+                container.add_item(next_work_text)
         
         self.add_item(container)
         await interaction.response.edit_message(view=self)
@@ -801,6 +969,8 @@ class Jobs(commands.Cog):
             account = self.eco.get_account(interaction.user)
             view = DeliveryGameView(account, interaction.user)
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            # Stocker la référence du message pour les timeouts
+            view.message = await interaction.original_response()
             set_cooldown(interaction.user, 'travail', COOLDOWNS['delivery'])
             
         elif work_type.lower() == "cuisinier":
@@ -820,6 +990,8 @@ class Jobs(commands.Cog):
             # Créer la vue du mini-jeu
             view = CookGameView(account, plat, ingredients, interaction.user)
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            # Stocker la référence du message pour les timeouts
+            view.message = await interaction.original_response()
             set_cooldown(interaction.user, 'travail', COOLDOWNS['cooking'])
             
         elif work_type.lower() == "pickpocket":
@@ -831,6 +1003,8 @@ class Jobs(commands.Cog):
             # Créer la vue du mini-jeu
             view = PickpocketGameView(account, guild_members, interaction.user)
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            # Stocker la référence du message pour les timeouts
+            view.message = await interaction.original_response()
             set_cooldown(interaction.user, 'travail', COOLDOWNS['pickpocket'])
             
         elif work_type.lower() == "hacker":
@@ -839,6 +1013,8 @@ class Jobs(commands.Cog):
             # Créer la vue du mini-jeu de hacking
             view = HackerGameView(account, interaction.user)
             await interaction.response.send_message(view=view, allowed_mentions=discord.AllowedMentions.none())
+            # Stocker la référence du message pour les timeouts
+            view.message = await interaction.original_response()
             set_cooldown(interaction.user, 'travail', COOLDOWNS['hacker'])
             
         else:
