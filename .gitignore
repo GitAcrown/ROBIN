@@ -136,3 +136,4 @@ dmypy.json
 common/global
 cogs/*/data/
 tests/
+temp/

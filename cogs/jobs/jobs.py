@@ -163,7 +163,6 @@ HACKER_SEQUENCES = [
     {"code": "KEYLOGGER", "hint": "[Informatique] Surveillant de frappe (EN)", "hint2": "Virus enregistrant les touches clavier", "reward": 45},
     {"code": "ROOTKIT", "hint": "[Informatique] Outil d'accès système caché (EN)", "hint2": "Kit d'outils administrateur cachés", "reward": 48},
     {"code": "SPYWARE", "hint": "[Informatique] Logiciel espion (EN)", "hint2": "Malware enregistrant l'activité de l'utilisateur", "reward": 40},
-    {"code": "SQLINJECTION", "hint": "[Informatique] Attaque de base de données (EN)", "hint2": "Injection de code SQL malveillant", "reward": 55},
     {"code": "BRUTEFORCE", "hint": "[Informatique] Méthode de cassage par force (EN)", "hint2": "Attaque qui teste toutes les combinaisons", "reward": 52},
     {"code": "ZERODAY", "hint": "[Informatique] Faille inédite et inconnue (EN)", "hint2": "Vulnérabilité jour zéro non corrigée", "reward": 58},
     {"code": "RANSOMWARE", "hint": "[Informatique] Logiciel de rançon (EN)", "hint2": "Malware qui chiffre les fichiers contre rançon", "reward": 54},
