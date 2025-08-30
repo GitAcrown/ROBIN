@@ -325,22 +325,37 @@ class CookGameView(ui.LayoutView):
         
     def calculate_tip(self, ingredient_category: str) -> int:
         """Calcule le tip basé sur la catégorie d'ingrédient choisi."""
-        base_tip = 22
-        
         if ingredient_category == "idéal":
-            # 70% chance pour le tip maximum, 25% pour moyen, 5% pour minimum
+            # Fourchettes pour ingrédients idéaux : meilleurs tips
+            tip_ranges = [
+                (18, 25),   # 5% - Tips bas
+                (26, 35),   # 25% - Tips moyens  
+                (36, 46)    # 70% - Tips élevés
+            ]
             weights = [0.05, 0.25, 0.70]
-            tips = [base_tip, base_tip * 1.5, base_tip * 2]
         elif ingredient_category == "alternatif":
-            # 40% chance pour tip maximum, 40% pour moyen, 20% pour minimum
+            # Fourchettes pour ingrédients alternatifs : tips moyens
+            tip_ranges = [
+                (15, 22),   # 20% - Tips bas
+                (23, 32),   # 40% - Tips moyens
+                (33, 42)    # 40% - Tips élevés
+            ]
             weights = [0.20, 0.40, 0.40]
-            tips = [base_tip, base_tip * 1.5, base_tip * 2]
         else:  # risqué
-            # 10% chance pour tip maximum, 20% pour moyen, 70% pour minimum
+            # Fourchettes pour ingrédients risqués : tips plus faibles
+            tip_ranges = [
+                (12, 20),   # 70% - Tips bas
+                (21, 28),   # 20% - Tips moyens
+                (29, 36)    # 10% - Tips élevés
+            ]
             weights = [0.70, 0.20, 0.10]
-            tips = [base_tip, base_tip * 1.5, base_tip * 2]
         
-        return random.choices(tips, weights=weights)[0]
+        # Choisir une fourchette selon les poids
+        selected_range = random.choices(tip_ranges, weights=weights)[0]
+        # Générer un tip aléatoire dans la fourchette sélectionnée
+        result_tip = random.randint(selected_range[0], selected_range[1])
+        
+        return result_tip
     
     async def show_result(self, interaction: discord.Interaction, tip: int, ingredient: str):
         """Affiche le résultat en modifiant la LayoutView."""
@@ -354,13 +369,15 @@ class CookGameView(ui.LayoutView):
         container.add_item(header)
         container.add_item(ui.Separator())
         
-        # Message basé sur le montant gagné
-        if tip >= 60:
+        # Message basé sur le montant gagné - ajusté aux nouvelles fourchettes (12-50)
+        if tip >= 35:
             result_msg = "*Excellent ! Le client a adoré !*"
-        elif tip >= 45:
+        elif tip >= 25:
             result_msg = "*Très bien ! Un plat réussi !*"
+        elif tip >= 18:
+            result_msg = "*Pas mal ! Service correct.*"
         else:
-            result_msg = "*Pas mal ! Mais le retour était un peu mitigé...*"
+            result_msg = "*Le client n'était pas très convaincu...*"
         
         result_text = ui.TextDisplay(result_msg)
         container.add_item(result_text)
